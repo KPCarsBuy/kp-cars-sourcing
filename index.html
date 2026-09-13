@@ -1,1098 +1,1643 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KP Cars — Sourcing</title>
-
-<style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:#090909;
-  color:#fff;
-}
-
-button,input,select{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-}
-
-.app{
-  display:flex;
-  min-height:100vh;
-}
-
-/* SIDEBAR */
-
-.sidebar{
-  width:250px;
-  background:#111;
-  border-right:1px solid #252525;
-  padding:28px 20px;
-  position:fixed;
-  top:0;
-  bottom:0;
-  left:0;
-}
-
-.logo{
-  font-size:25px;
-  font-weight:900;
-  letter-spacing:3px;
-  margin-bottom:8px;
-}
-
-.logo-sub{
-  color:#777;
-  font-size:11px;
-  letter-spacing:2px;
-  margin-bottom:45px;
-}
-
-.menu{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.menu button{
-  border:0;
-  background:transparent;
-  color:#888;
-  text-align:left;
-  padding:15px;
-  border-radius:8px;
-}
-
-.menu button:hover,
-.menu button.active{
-  background:#222;
-  color:#fff;
-}
-
-.main{
-  margin-left:250px;
-  width:calc(100% - 250px);
-  padding:35px;
-}
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:35px;
-}
-
-.topbar h1{
-  font-size:32px;
-}
-
-.badge{
-  border:1px solid #333;
-  padding:10px 15px;
-  border-radius:30px;
-  color:#aaa;
-  font-size:13px;
-}
-
-/* PAGES */
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
-
-/* CARDS */
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:18px;
-  margin-bottom:30px;
-}
-
-.stat{
-  background:#111;
-  border:1px solid #252525;
-  border-radius:12px;
-  padding:24px;
-}
-
-.stat-label{
-  color:#777;
-  font-size:13px;
-  margin-bottom:12px;
-}
-
-.stat-value{
-  font-size:30px;
-  font-weight:800;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:20px;
-}
-
-.panel{
-  background:#111;
-  border:1px solid #252525;
-  border-radius:12px;
-  padding:25px;
-  margin-bottom:20px;
-}
-
-.panel h2{
-  margin-bottom:8px;
-  font-size:21px;
-}
-
-.panel-sub{
-  color:#777;
-  font-size:13px;
-  margin-bottom:25px;
-}
-
-/* SOURCING */
-
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:16px;
-}
-
-.field label{
-  display:block;
-  color:#888;
-  font-size:12px;
-  margin-bottom:8px;
-}
-
-.field input,
-.field select{
-  width:100%;
-  background:#0b0b0b;
-  color:#fff;
-  border:1px solid #333;
-  border-radius:7px;
-  padding:13px;
-  outline:none;
-}
-
-.field input:focus,
-.field select:focus{
-  border-color:#777;
-}
-
-.full{
-  grid-column:1/-1;
-}
-
-.primary{
-  width:100%;
-  border:0;
-  background:#fff;
-  color:#000;
-  padding:15px;
-  border-radius:7px;
-  font-weight:800;
-  margin-top:20px;
-}
-
-.primary:hover{
-  background:#ddd;
-}
-
-/* VEHICLES */
-
-.vehicle{
-  border:1px solid #292929;
-  border-radius:10px;
-  padding:20px;
-  margin-bottom:15px;
-  background:#0d0d0d;
-}
-
-.vehicle-head{
-  display:flex;
-  justify-content:space-between;
-  gap:20px;
-}
-
-.vehicle h3{
-  font-size:20px;
-  margin-bottom:8px;
-}
-
-.vehicle-info{
-  color:#888;
-  font-size:13px;
-  line-height:1.7;
-}
-
-.margin{
-  font-size:24px;
-  font-weight:800;
-  text-align:right;
-}
-
-.good{
-  color:#fff;
-}
-
-.vehicle-actions{
-  display:flex;
-  gap:8px;
-  margin-top:15px;
-}
-
-.small-btn{
-  border:1px solid #333;
-  background:#181818;
-  color:#fff;
-  padding:9px 13px;
-  border-radius:6px;
-}
-
-.small-btn:hover{
-  background:#292929;
-}
-
-/* ANALYSIS */
-
-.result{
-  background:#0b0b0b;
-  border:1px solid #292929;
-  border-radius:10px;
-  padding:20px;
-  margin-top:20px;
-}
-
-.result-row{
-  display:flex;
-  justify-content:space-between;
-  padding:11px 0;
-  border-bottom:1px solid #222;
-  color:#aaa;
-}
-
-.result-row:last-child{
-  border-bottom:0;
-}
-
-.result-row strong{
-  color:#fff;
-}
-
-.big-result{
-  font-size:32px;
-  font-weight:900;
-  margin-top:20px;
-}
-
-/* MOBILE */
-
-.mobile-menu{
-  display:none;
-}
-
-@media(max-width:900px){
-
-  .sidebar{
-    display:none;
-  }
-
-  .main{
-    margin-left:0;
-    width:100%;
-    padding:20px;
-  }
-
-  .mobile-menu{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:25px;
-  }
-
-  .mobile-menu button{
-    background:#181818;
-    border:1px solid #333;
-    color:#fff;
-    padding:10px 14px;
-    border-radius:7px;
-  }
-
-  .stats{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .grid{
-    grid-template-columns:1fr;
-  }
-
-  .form-grid{
-    grid-template-columns:1fr;
-  }
-
-  .full{
-    grid-column:auto;
-  }
-}
-
-@media(max-width:500px){
-
-  .stats{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .stat{
-    padding:16px;
-  }
-
-  .stat-value{
-    font-size:24px;
-  }
-
-  .topbar h1{
-    font-size:25px;
-  }
-
-  .vehicle-head{
-    flex-direction:column;
-  }
-
-  .margin{
-    text-align:left;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>KP Cars — Sourcing</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #080808;
+      color: #f5f5f5;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font-family: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(8, 8, 8, 0.96);
+      border-bottom: 1px solid #292929;
+      padding: 18px 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 12px;
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+
+    /* =========================
+       NAVIGATION
+    ========================= */
+
+    nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 16px;
+      border-bottom: 1px solid #222;
+      background: #0c0c0c;
+    }
+
+    nav button {
+      flex: 0 0 auto;
+      border: 1px solid #333;
+      background: #111;
+      color: #ddd;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    nav button.active {
+      background: #f5f5f5;
+      color: #080808;
+    }
+
+    /* =========================
+       CONTENT
+    ========================= */
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .hero {
+      padding: 30px 0 20px;
+    }
+
+    .hero h1 {
+      font-size: 34px;
+      margin: 0 0 10px;
+    }
+
+    .hero p {
+      color: #888;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .panel {
+      background: #111;
+      border: 1px solid #292929;
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .panel-sub {
+      color: #888;
+      margin-top: 0;
+      line-height: 1.5;
+    }
+
+    /* =========================
+       DASHBOARD
+    ========================= */
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .stat {
+      background: #111;
+      border: 1px solid #292929;
+      border-radius: 16px;
+      padding: 22px;
+    }
+
+    .stat-label {
+      color: #888;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .big-action {
+      width: 100%;
+      margin-top: 20px;
+      padding: 22px;
+      border-radius: 16px;
+      border: 0;
+      background: #f2f2f2;
+      color: #080808;
+      font-size: 19px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* =========================
+       FORMULAIRE SOURCING
+    ========================= */
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field label {
+      color: #aaa;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      background: #090909;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 14px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #777;
+    }
+
+    .search-button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 17px;
+      border: 0;
+      border-radius: 12px;
+      background: #f5f5f5;
+      color: #080808;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* =========================
+       VEHICULES
+    ========================= */
+
+    .vehicle {
+      background: #090909;
+      border: 1px solid #303030;
+      border-radius: 17px;
+      padding: 24px;
+      margin-top: 16px;
+    }
+
+    .vehicle-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .vehicle h3 {
+      font-size: 25px;
+      margin: 0 0 12px;
+    }
+
+    .vehicle-info {
+      color: #999;
+      line-height: 1.75;
+      font-size: 15px;
+    }
+
+    .margin {
+      font-size: 30px;
+      font-weight: 800;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .metric-list {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid #292929;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 7px 0;
+      color: #aaa;
+    }
+
+    .metric strong {
+      color: #eee;
+    }
+
+    .metric.total {
+      margin-top: 5px;
+      padding-top: 13px;
+      border-top: 1px solid #292929;
+      color: #fff;
+      font-size: 17px;
+    }
+
+    .net-margin {
+      margin-top: 20px;
+      font-size: 36px;
+      font-weight: 900;
+    }
+
+    .net-label {
+      color: #888;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .analysis-box {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid #292929;
+    }
+
+    .roi {
+      font-size: 23px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .score {
+      color: #999;
+      margin-bottom: 12px;
+    }
+
+    .opportunity {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .vehicle-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .vehicle-actions button,
+    .vehicle-actions a {
+      flex: 1;
+      min-height: 52px;
+      border-radius: 11px;
+      border: 1px solid #444;
+      background: #101010;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .vehicle-actions button:hover,
+    .vehicle-actions a:hover {
+      background: #191919;
+    }
+
+    .no-link {
+      margin-top: 20px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* =========================
+       STOCK
+    ========================= */
+
+    .stock-empty {
+      color: #777;
+      text-align: center;
+      padding: 30px 10px;
+    }
+
+    .stock-item {
+      border: 1px solid #292929;
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 12px;
+      background: #0a0a0a;
+    }
+
+    .stock-item h3 {
+      margin: 0 0 10px;
+    }
+
+    .stock-remove {
+      margin-top: 12px;
+      border: 1px solid #444;
+      background: #111;
+      color: #fff;
+      border-radius: 8px;
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+
+    /* =========================
+       ANALYSE
+    ========================= */
+
+    .calculator {
+      display: grid;
+      gap: 14px;
+    }
+
+    .result-calculator {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid #292929;
+      background: #090909;
+    }
+
+    .calc-result {
+      font-size: 32px;
+      font-weight: 900;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+      main {
+        padding: 14px;
+      }
+
+      .dashboard-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .vehicle-head {
+        flex-direction: column;
+      }
+
+      .margin {
+        text-align: left;
+      }
+
+      .vehicle-actions {
+        flex-direction: column;
+      }
+
+      .hero h1 {
+        font-size: 29px;
+      }
+
+      .vehicle h3 {
+        font-size: 23px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="app">
 
-<!-- SIDEBAR -->
+  <!-- =========================
+       HEADER
+  ========================== -->
 
-<aside class="sidebar">
+  <header>
+    <div class="logo">KP CARS</div>
+    <div class="subtitle">BUY • SOURCE • RESELL</div>
+  </header>
 
-  <div class="logo">KP CARS</div>
-  <div class="logo-sub">AUTOMOTIVE SOURCING</div>
 
-  <div class="menu">
+  <!-- =========================
+       NAVIGATION
+  ========================== -->
 
-    <button class="active" onclick="showPage('dashboard',this)">
-      🏠 Dashboard
+  <nav>
+    <button id="nav-dashboard" class="active" onclick="showPage('dashboard')">
+      Dashboard
     </button>
 
-    <button onclick="showPage('sourcing',this)">
-      🔎 Sourcing
+    <button id="nav-sourcing" onclick="showPage('sourcing')">
+      Sourcing
     </button>
 
-    <button onclick="showPage('stock',this)">
-      🚗 Stock
+    <button id="nav-stock" onclick="showPage('stock')">
+      Stock
     </button>
 
-    <button onclick="showPage('analyse',this)">
-      📊 Analyse
+    <button id="nav-analyse" onclick="showPage('analyse')">
+      Analyse
     </button>
+  </nav>
 
-  </div>
 
-</aside>
+  <main>
 
-<!-- MAIN -->
+    <!-- =========================
+         DASHBOARD
+    ========================== -->
 
-<main class="main">
+    <section id="dashboard" class="page active">
 
-<div class="mobile-menu">
-  <strong>KP CARS</strong>
-  <button onclick="toggleMobileMenu()">☰ Menu</button>
-</div>
+      <div class="hero">
+        <h1>KP Cars</h1>
+        <p>
+          Plateforme de sourcing et d'analyse pour marchand automobile.
+        </p>
+      </div>
 
-<div class="topbar">
-  <h1 id="pageTitle">Dashboard</h1>
-  <div class="badge">KP CARS • V1</div>
-</div>
+      <div class="dashboard-grid">
 
-<!-- DASHBOARD -->
-
-<section id="dashboard" class="page active">
-
-<div class="stats">
-
-  <div class="stat">
-    <div class="stat-label">VÉHICULES EN STOCK</div>
-    <div class="stat-value" id="statStock">0</div>
-  </div>
-
-  <div class="stat">
-    <div class="stat-label">OPPORTUNITÉS</div>
-    <div class="stat-value" id="statOpp">0</div>
-  </div>
-
-  <div class="stat">
-    <div class="stat-label">VALEUR D'ACHAT</div>
-    <div class="stat-value" id="statBuy">0 €</div>
-  </div>
-
-  <div class="stat">
-    <div class="stat-label">MARGE POTENTIELLE</div>
-    <div class="stat-value" id="statMargin">0 €</div>
-  </div>
-
-</div>
-
-<div class="grid">
-
-<div class="panel">
-
-<h2>Bienvenue chez KP Cars</h2>
-
-<p class="panel-sub">
-Votre centre de sourcing automobile européen.
-</p>
-
-<p style="color:#aaa;line-height:1.7">
-Recherchez, analysez et gérez vos opportunités automobiles
-depuis une seule interface.
-</p>
-
-<button class="primary" onclick="showPage('sourcing')">
-LANCER UN SOURCING
-</button>
-
-</div>
-
-<div class="panel">
-
-<h2>KP Cars</h2>
-
-<p class="panel-sub">
-Objectif
-</p>
-
-<div style="font-size:28px;font-weight:900">
-BUY SMART.
-<br>
-SELL SMART.
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-<!-- SOURCING -->
-
-<section id="sourcing" class="page">
-
-<div class="panel">
-
-<h2>Recherche de véhicule</h2>
-
-<p class="panel-sub">
-Définissez vos critères d'achat.
-</p>
-
-<div class="form-grid">
-
-<div class="field">
-<label>MARQUE</label>
-<input id="brand" placeholder="Ex : Mercedes">
-</div>
-
-<div class="field">
-<label>MODÈLE</label>
-<input id="model" placeholder="Ex : A45 S AMG">
-</div>
-
-<div class="field">
-<label>ANNÉE MINIMUM</label>
-<input id="yearMin" type="number" placeholder="2020">
-</div>
-
-<div class="field">
-<label>KILOMÉTRAGE MAXIMUM</label>
-<input id="kmMax" type="number" placeholder="100000">
-</div>
-
-<div class="field">
-<label>PRIX D'ACHAT MAXIMUM (€)</label>
-<input id="buyMax" type="number" placeholder="30000">
-</div>
-
-<div class="field">
-<label>PAYS</label>
-<select id="country">
-<option>Allemagne</option>
-<option>Belgique</option>
-<option>France</option>
-<option>Pays-Bas</option>
-<option>Luxembourg</option>
-<option>Italie</option>
-</select>
-</div>
-
-</div>
-
-<button class="primary" onclick="runSearch()">
-🔎 ANALYSER LES OPPORTUNITÉS
-</button>
-
-</div>
-
-<div id="searchResult"></div>
-
-</section>
-
-<!-- STOCK -->
-
-<section id="stock" class="page">
-
-<div class="panel">
-
-<h2>Stock KP Cars</h2>
-
-<p class="panel-sub">
-Vos véhicules et opportunités enregistrés.
-</p>
-
-<div id="stockList"></div>
-
-</div>
-
-</section>
-
-<!-- ANALYSE -->
-
-<section id="analyse" class="page">
-
-<div class="panel">
-
-<h2>Calculateur de marge</h2>
-
-<p class="panel-sub">
-Calculez rapidement la rentabilité d'une opération.
-</p>
-
-<div class="form-grid">
-
-<div class="field">
-<label>PRIX D'ACHAT (€)</label>
-<input id="aBuy" type="number" value="10000">
-</div>
-
-<div class="field">
-<label>TRANSPORT / IMPORT (€)</label>
-<input id="aImport" type="number" value="700">
-</div>
-
-<div class="field">
-<label>REMISE EN ÉTAT (€)</label>
-<input id="aRepair" type="number" value="500">
-</div>
-
-<div class="field">
-<label>AUTRES FRAIS (€)</label>
-<input id="aOther" type="number" value="300">
-</div>
-
-<div class="field full">
-<label>PRIX DE REVENTE ESTIMÉ (€)</label>
-<input id="aSell" type="number" value="15000">
-</div>
-
-</div>
-
-<button class="primary" onclick="calculateMargin()">
-CALCULER LA MARGE
-</button>
-
-<div id="analysisResult"></div>
-
-</div>
-
-</section>
-
-</main>
-</div>
-
-<script>
-
-let stock = JSON.parse(localStorage.getItem("kpCarsStock") || "[]");
-
-function saveStock(){
-  localStorage.setItem("kpCarsStock",JSON.stringify(stock));
-  updateStats();
-  renderStock();
-}
-
-function showPage(page,button){
-
-  document.querySelectorAll(".page").forEach(p=>{
-    p.classList.remove("active");
-  });
-
-  document.getElementById(page).classList.add("active");
-
-  document.querySelectorAll(".menu button").forEach(b=>{
-    b.classList.remove("active");
-  });
-
-  if(button){
-    button.classList.add("active");
-  }
-
-  const titles={
-    dashboard:"Dashboard",
-    sourcing:"Sourcing",
-    stock:"Stock",
-    analyse:"Analyse"
-  };
-
-  document.getElementById("pageTitle").textContent=titles[page];
-
-  renderStock();
-  updateStats();
-
-  window.scrollTo(0,0);
-}
-
-function toggleMobileMenu(){
-  alert("Utilisez le menu principal sur ordinateur pour naviguer entre les sections.");
-}
-
-async function runSearch(){
-  const brand = document.getElementById("brand").value || "";
-  const model = document.getElementById("model").value || "";
-  const year = document.getElementById("yearMin").value || "";
-  const km = document.getElementById("kmMax").value || "";
-  const buy = document.getElementById("buyMax").value || "";
-  const country = document.getElementById("country").value || "";
-
-  const resultBox = document.getElementById("searchResult");
-
-  resultBox.innerHTML = `
-    <div class="panel">
-      <h2>Recherche en cours...</h2>
-      <p class="panel-sub">
-        KP Cars analyse les opportunités.
-      </p>
-    </div>
-  `;
-
-  try {
-
-    const response = await fetch(
-      "https://kp-cars-sourcing.onrender.com/api/search",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          marque: brand,
-          modele: model,
-          annee_min: year,
-          km_max: km,
-          prix_max: buy,
-          pays: country
-        })
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        "Erreur serveur : " + response.status
-      );
-    }
-
-    const vehicles = await response.json();
-
-    if (!vehicles.length) {
-
-      resultBox.innerHTML = `
-        <div class="panel">
-          <h2>Aucune opportunité trouvée</h2>
-
-          <p class="panel-sub">
-            Aucun véhicule ne correspond à vos critères.
-          </p>
-
-          <div class="vehicle-info">
-            ${brand || "Toutes marques"} •
-            ${model || "Tous modèles"} •
-            ${country || "Tous pays"}
-          </div>
+        <div class="stat">
+          <div class="stat-label">Sourcing</div>
+          <div class="stat-value">AUTO</div>
         </div>
-      `;
 
-      return;
-    }
+        <div class="stat">
+          <div class="stat-label">Analyse</div>
+          <div class="stat-value">KP</div>
+        </div>
 
-    resultBox.innerHTML = `
-      <div class="panel">
+        <div class="stat">
+          <div class="stat-label">Stock</div>
+          <div class="stat-value" id="dashboardStockCount">0</div>
+        </div>
 
-        <h2>
-          ${vehicles.length} opportunité(s) trouvée(s)
-        </h2>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+
+        <h2>🚀 Trouver une opportunité</h2>
 
         <p class="panel-sub">
-          Analyse KP Cars
+          Recherche un véhicule selon tes critères d'achat et analyse
+          automatiquement sa rentabilité.
         </p>
 
-        ${vehicles.map(v => {
-
-          let badgeClass = "";
-
-          if (v.score >= 80) {
-            badgeClass = "excellent";
-          } else if (v.score >= 60) {
-            badgeClass = "very-good";
-          } else if (v.score >= 40) {
-            badgeClass = "interesting";
-          } else {
-            badgeClass = "study";
-          }
-
-          return `
-            <div class="vehicle">
-
-              <div class="vehicle-head">
-
-                <div>
-
-                  <h3>
-                    ${v.marque} ${v.modele}
-                  </h3>
-
-                  <div class="vehicle-info">
-
-                    Pays :
-                    ${v.pays || v.source || "—"}<br>
-
-                    Année :
-                    ${v.annee || "—"}<br>
-
-                    Kilométrage :
-                    ${Number(
-                      v.kilometrage || 0
-                    ).toLocaleString()} km<br>
-
-                    Prix achat :
-                    ${Number(
-                      v.prix_achat || 0
-                    ).toLocaleString()} €<br>
-
-                    Transport :
-                    ${Number(
-                      v.frais_transport || 0
-                    ).toLocaleString()} €<br>
-
-                    Frais administratifs :
-                    ${Number(
-                      v.frais_admin || 0
-                    ).toLocaleString()} €<br>
-
-                    Préparation :
-                    ${Number(
-                      v.reserve_preparation || 0
-                    ).toLocaleString()} €<br>
-
-                    <strong>
-                      Coût total :
-                      ${Number(
-                        v.cout_total || 0
-                      ).toLocaleString()} €
-                    </strong>
-
-                  </div>
-
-                </div>
-
-                <div class="margin">
-
-                  ${Number(
-                    v.marge || 0
-                  ).toLocaleString()} €
-
-                  <div style="
-                    font-size:11px;
-                    color:#777
-                  ">
-                    MARGE NETTE
-                  </div>
-
-                </div>
-
-              </div>
-
-              <div style="
-                margin-top:18px;
-                padding-top:15px;
-                border-top:1px solid #222;
-              ">
-
-                <div style="
-                  display:flex;
-                  justify-content:space-between;
-                  align-items:center;
-                  gap:10px;
-                  flex-wrap:wrap;
-                ">
-
-                  <div>
-
-                    <strong>
-                      ROI :
-                      ${Number(
-                        v.roi || 0
-                      ).toFixed(1)} %
-                    </strong>
-
-                    <br>
-
-                    <span style="
-                      color:#888;
-                      font-size:13px;
-                    ">
-                      Score KP Cars :
-                      ${v.score || 0}/100
-                    </span>
-
-                  </div>
-
-                  <div class="${badgeClass}" style="
-                    font-weight:700;
-                    letter-spacing:.5px;
-                  ">
-                    ${v.opportunite || "À ÉTUDIER"}
-                  </div>
-
-                </div>
-
-                ${
-                  v.url
-                    ? `
-                      <a
-                        href="${v.url}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style="
-                          display:block;
-                          margin-top:15px;
-                          text-align:center;
-                          padding:13px;
-                          border:1px solid #444;
-                          border-radius:8px;
-                          color:white;
-                          text-decoration:none;
-                          font-weight:700;
-                        "
-                      >
-                        🔗 VOIR L'ANNONCE
-                      </a>
-                    `
-                    : `
-                      <div style="
-                        margin-top:15px;
-                        color:#777;
-                        font-size:13px;
-                      ">
-                        Aucun lien d'annonce disponible
-                      </div>
-                    `
-                }
-
-              </div>
-
-            </div>
-          `;
-
-        }).join("")}
-
-      </div>
-    `;
-
-  } catch (error) {
-
-    console.error(error);
-
-    resultBox.innerHTML = `
-      <div class="panel">
-
-        <h2>Erreur de connexion</h2>
-
-        <p class="panel-sub">
-          Impossible de contacter le serveur KP Cars.
-        </p>
-
-        <div class="vehicle-info">
-          ${error.message}
-        </div>
-
-      </div>
-    `;
-  }
-}
-function renderStock(){
-  const container=document.getElementById("stockList");
-
-  if(!container) return;
-
-  if(stock.length===0){
-
-    container.innerHTML=`
-
-    <div style="padding:40px;text-align:center;color:#666">
-      Aucun véhicule dans le stock.<br><br>
-      Lancez un sourcing pour ajouter votre première opportunité.
-    </div>
-
-    `;
-
-    return;
-  }
-
-  container.innerHTML=stock.map(v=>`
-
-    <div class="vehicle">
-
-      <div class="vehicle-head">
-
-        <div>
-
-          <h3>${v.brand} ${v.model}</h3>
-
-          <div class="vehicle-info">
-            ${v.country}<br>
-            Année : ${v.year}<br>
-            Kilométrage max : ${Number(v.km).toLocaleString()} km<br>
-            Achat : ${Number(v.buy).toLocaleString()} €<br>
-            Revente estimée : ${Number(v.sell).toLocaleString()} €
-          </div>
-
-        </div>
-
-        <div class="margin">
-          ${Number(v.margin).toLocaleString()} €
-          <div style="font-size:11px;color:#777">
-            MARGE
-          </div>
-        </div>
-
-      </div>
-
-      <div class="vehicle-actions">
-
-        <button class="small-btn"
-          onclick="removeVehicle(${v.id})">
-          SUPPRIMER
+        <button class="big-action" onclick="showPage('sourcing')">
+          🔎 ANALYSER LES OPPORTUNITÉS
         </button>
 
       </div>
 
-    </div>
+    </section>
 
-  `).join("");
-}
 
-function updateStats(){
+    <!-- =========================
+         SOURCING
+    ========================== -->
 
-  document.getElementById("statStock").textContent=stock.length;
+    <section id="sourcing" class="page">
 
-  document.getElementById("statOpp").textContent=stock.length;
-
-  const buy=stock.reduce((sum,v)=>sum+Number(v.buy||0),0);
-
-  const margin=stock.reduce((sum,v)=>sum+Number(v.margin||0),0);
-
-  document.getElementById("statBuy").textContent=
-    buy.toLocaleString()+" €";
-
-  document.getElementById("statMargin").textContent=
-    margin.toLocaleString()+" €";
-}
-
-function calculateMargin(){
-
-  const buy=Number(document.getElementById("aBuy").value)||0;
-  const imp=Number(document.getElementById("aImport").value)||0;
-  const repair=Number(document.getElementById("aRepair").value)||0;
-  const other=Number(document.getElementById("aOther").value)||0;
-  const sell=Number(document.getElementById("aSell").value)||0;
-
-  const total=buy+imp+repair+other;
-
-  const margin=sell-total;
-
-  const percentage=
-    sell>0 ? ((margin/sell)*100).toFixed(1) : 0;
-
-  document.getElementById("analysisResult").innerHTML=`
-
-  <div class="result">
-
-    <div class="result-row">
-      <span>Prix d'achat</span>
-      <strong>${buy.toLocaleString()} €</strong>
-    </div>
-
-    <div class="result-row">
-      <span>Import / transport</span>
-      <strong>${imp.toLocaleString()} €</strong>
-    </div>
-
-    <div class="result-row">
-      <span>Remise en état</span>
-      <strong>${repair.toLocaleString()} €</strong>
-    </div>
-
-    <div class="result-row">
-      <span>Autres frais</span>
-      <strong>${other.toLocaleString()} €</strong>
-    </div>
-
-    <div class="result-row">
-      <span>Coût total</span>
-      <strong>${total.toLocaleString()} €</strong>
-    </div>
-
-    <div class="result-row">
-      <span>Revente estimée</span>
-      <strong>${sell.toLocaleString()} €</strong>
-    </div>
-
-    <div class="big-result">
-      ${margin.toLocaleString()} €
-      <div style="font-size:12px;color:#777">
-        MARGE POTENTIELLE • ${percentage}%
+      <div class="hero">
+        <h1>Sourcing automobile</h1>
+        <p>
+          Définis tes critères d'achat et KP Cars analyse les opportunités.
+        </p>
       </div>
-    </div>
 
-  </div>
+      <div class="panel">
 
-  `;
-}
+        <h2>🔎 Recherche</h2>
 
-updateStats();
-renderStock();
+        <p class="panel-sub">
+          Paramètres de recherche
+        </p>
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label for="brand">Marque</label>
+            <input
+              id="brand"
+              type="text"
+              placeholder="Ex : Renault"
+            >
+          </div>
+
+          <div class="field">
+            <label for="model">Modèle</label>
+            <input
+              id="model"
+              type="text"
+              placeholder="Ex : Clio"
+            >
+          </div>
+
+          <div class="field">
+            <label for="yearMin">Année minimum</label>
+            <input
+              id="yearMin"
+              type="number"
+              placeholder="Ex : 2009"
+            >
+          </div>
+
+          <div class="field">
+            <label for="kmMax">Kilométrage maximum</label>
+            <input
+              id="kmMax"
+              type="number"
+              placeholder="Ex : 150000"
+            >
+          </div>
+
+          <div class="field">
+            <label for="buyMax">Prix achat maximum (€)</label>
+            <input
+              id="buyMax"
+              type="number"
+              placeholder="Ex : 5000"
+            >
+          </div>
+
+          <div class="field">
+            <label for="country">Pays</label>
+
+            <select id="country">
+
+              <option value="">
+                Tous les pays
+              </option>
+
+              <option value="Allemagne">
+                Allemagne
+              </option>
+
+              <option value="Belgique">
+                Belgique
+              </option>
+
+              <option value="France">
+                France
+              </option>
+
+              <option value="Pays-Bas">
+                Pays-Bas
+              </option>
+
+              <option value="Luxembourg">
+                Luxembourg
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+        <button
+          class="search-button"
+          onclick="runSearch()"
+        >
+          🔎 LANCER LA RECHERCHE
+        </button>
+
+      </div>
+
+
+      <div id="searchResult"></div>
+
+    </section>
+
+
+    <!-- =========================
+         STOCK
+    ========================== -->
+
+    <section id="stock" class="page">
+
+      <div class="hero">
+        <h1>Mon stock</h1>
+        <p>
+          Véhicules sélectionnés pour analyse ou achat.
+        </p>
+      </div>
+
+      <div class="panel">
+
+        <h2>🚗 Véhicules sauvegardés</h2>
+
+        <div id="stockList"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         ANALYSE
+    ========================== -->
+
+    <section id="analyse" class="page">
+
+      <div class="hero">
+        <h1>Analyse</h1>
+        <p>
+          Calcule rapidement le coût réel et la rentabilité d'un véhicule.
+        </p>
+      </div>
+
+      <div class="panel">
+
+        <h2>📊 Calculateur KP Cars</h2>
+
+        <div class="calculator">
+
+          <div class="field">
+            <label for="calcBuy">
+              Prix d'achat (€)
+            </label>
+
+            <input
+              id="calcBuy"
+              type="number"
+              value="3900"
+              oninput="calculateManual()"
+            >
+          </div>
+
+
+          <div class="field">
+            <label for="calcTransport">
+              Transport (€)
+            </label>
+
+            <input
+              id="calcTransport"
+              type="number"
+              value="750"
+              oninput="calculateManual()"
+            >
+          </div>
+
+
+          <div class="field">
+            <label for="calcAdmin">
+              Frais administratifs (€)
+            </label>
+
+            <input
+              id="calcAdmin"
+              type="number"
+              value="250"
+              oninput="calculateManual()"
+            >
+          </div>
+
+
+          <div class="field">
+            <label for="calcPrep">
+              Préparation (€)
+            </label>
+
+            <input
+              id="calcPrep"
+              type="number"
+              value="500"
+              oninput="calculateManual()"
+            >
+          </div>
+
+
+          <div class="field">
+            <label for="calcSell">
+              Prix de revente (€)
+            </label>
+
+            <input
+              id="calcSell"
+              type="number"
+              value="6490"
+              oninput="calculateManual()"
+            >
+          </div>
+
+        </div>
+
+
+        <div class="result-calculator">
+
+          <div>
+            Coût total
+          </div>
+
+          <div
+            id="calcCost"
+            class="calc-result"
+          >
+            5 400 €
+          </div>
+
+          <br>
+
+          <div>
+            Marge nette
+          </div>
+
+          <div
+            id="calcMargin"
+            class="calc-result"
+          >
+            1 090 €
+          </div>
+
+          <br>
+
+          <div>
+            ROI
+          </div>
+
+          <div
+            id="calcROI"
+            class="calc-result"
+          >
+            20.2 %
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<script>
+
+  /* =========================================================
+     CONFIGURATION
+  ========================================================= */
+
+  const API_URL = "https://kp-cars-sourcing.onrender.com";
+
+
+  /* =========================================================
+     NAVIGATION
+  ========================================================= */
+
+  function showPage(pageId) {
+
+    const pages = document.querySelectorAll(".page");
+
+    pages.forEach(page => {
+      page.classList.remove("active");
+    });
+
+    const target = document.getElementById(pageId);
+
+    if (target) {
+      target.classList.add("active");
+    }
+
+
+    const navButtons = document.querySelectorAll("nav button");
+
+    navButtons.forEach(button => {
+      button.classList.remove("active");
+    });
+
+
+    const navButton = document.getElementById(
+      "nav-" + pageId
+    );
+
+    if (navButton) {
+      navButton.classList.add("active");
+    }
+
+
+    if (pageId === "stock") {
+      renderStock();
+    }
+
+  }
+
+
+  /* =========================================================
+     SECURITE HTML
+  ========================================================= */
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  function escapeAttribute(value) {
+
+    return escapeHtml(value);
+
+  }
+
+
+  /* =========================================================
+     FORMAT EURO
+  ========================================================= */
+
+  function euro(value) {
+
+    const number = Number(value || 0);
+
+    return number.toLocaleString("fr-FR", {
+      maximumFractionDigits: 0
+    }) + " €";
+
+  }
+
+
+  function percentage(value) {
+
+    const number = Number(value || 0);
+
+    return number.toFixed(1) + " %";
+
+  }
+
+
+  /* =========================================================
+     VEHICLE CARD
+  ========================================================= */
+
+  function vehicleCard(vehicle) {
+
+    const marque = escapeHtml(vehicle.marque || "");
+    const modele = escapeHtml(vehicle.modele || "");
+
+    const pays = escapeHtml(vehicle.pays || "—");
+
+    const annee = vehicle.annee || "—";
+
+    const kilometrage = Number(
+      vehicle.kilometrage || 0
+    ).toLocaleString("fr-FR");
+
+    const prixAchat = Number(
+      vehicle.prix_achat || 0
+    );
+
+    /*
+      IMPORTANT :
+      On utilise directement les champs envoyés
+      par server.py.
+    */
+
+    const transport = Number(
+      vehicle.transport || 0
+    );
+
+    const fraisAdmin = Number(
+      vehicle.frais_admin || 0
+    );
+
+    const preparation = Number(
+      vehicle.preparation || 0
+    );
+
+    const coutTotal = Number(
+      vehicle.cout_total || 0
+    );
+
+    const margeNette = Number(
+      vehicle.marge_nette ?? vehicle.marge ?? 0
+    );
+
+    const roi = Number(
+      vehicle.roi || 0
+    );
+
+    const score = Number(
+      vehicle.score || 0
+    );
+
+    const opportunite = escapeHtml(
+      vehicle.opportunite || "—"
+    );
+
+    const url = vehicle.url || "";
+
+
+    let actionHtml = "";
+
+    if (url) {
+
+      actionHtml = `
+        <div class="vehicle-actions">
+
+          <a
+            href="${escapeAttribute(url)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            🔗 VOIR L'ANNONCE
+          </a>
+
+          <button
+            onclick='addToStock(${JSON.stringify(vehicle)})'
+          >
+            ➕ AJOUTER AU STOCK
+          </button>
+
+        </div>
+      `;
+
+    } else {
+
+      actionHtml = `
+        <div class="vehicle-actions">
+
+          <button
+            onclick='addToStock(${JSON.stringify(vehicle)})'
+          >
+            ➕ AJOUTER AU STOCK
+          </button>
+
+        </div>
+
+        <div class="no-link">
+          Aucun lien d'annonce disponible
+        </div>
+      `;
+
+    }
+
+
+    return `
+
+      <div class="vehicle">
+
+        <div class="vehicle-head">
+
+          <div>
+
+            <h3>
+              ${marque} ${modele}
+            </h3>
+
+            <div class="vehicle-info">
+
+              Pays : ${pays}<br>
+
+              Année : ${annee}<br>
+
+              Kilométrage : ${kilometrage} km<br>
+
+              Prix achat : ${euro(prixAchat)}
+
+            </div>
+
+          </div>
+
+          <div class="margin">
+
+            ${euro(margeNette)}
+
+            <div
+              style="
+                font-size:11px;
+                color:#777;
+                margin-top:4px;
+              "
+            >
+              MARGE NETTE
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="metric-list">
+
+          <div class="metric">
+            <span>Transport</span>
+            <strong>${euro(transport)}</strong>
+          </div>
+
+          <div class="metric">
+            <span>Frais administratifs</span>
+            <strong>${euro(fraisAdmin)}</strong>
+          </div>
+
+          <div class="metric">
+            <span>Préparation</span>
+            <strong>${euro(preparation)}</strong>
+          </div>
+
+          <div class="metric total">
+            <span>Coût total</span>
+            <strong>${euro(coutTotal)}</strong>
+          </div>
+
+        </div>
+
+
+        <div class="net-margin">
+
+          ${euro(margeNette)}
+
+        </div>
+
+        <div class="net-label">
+          MARGE NETTE
+        </div>
+
+
+        <div class="analysis-box">
+
+          <div class="roi">
+            ROI : ${percentage(roi)}
+          </div>
+
+          <div class="score">
+            Score KP Cars : ${score}/100
+          </div>
+
+          <div class="opportunity">
+            ${opportunite}
+          </div>
+
+        </div>
+
+
+        ${actionHtml}
+
+      </div>
+
+    `;
+
+  }
+
+
+  /* =========================================================
+     RECHERCHE
+  ========================================================= */
+
+  async function runSearch() {
+
+    const brand =
+      document.getElementById("brand").value || "";
+
+    const model =
+      document.getElementById("model").value || "";
+
+    const year =
+      document.getElementById("yearMin").value || "";
+
+    const km =
+      document.getElementById("kmMax").value || "";
+
+    const buy =
+      document.getElementById("buyMax").value || "";
+
+    const country =
+      document.getElementById("country").value || "";
+
+
+    const resultBox =
+      document.getElementById("searchResult");
+
+
+    resultBox.innerHTML = `
+
+      <div class="panel">
+
+        <h2>
+          Recherche en cours...
+        </h2>
+
+        <p class="panel-sub">
+          KP Cars interroge son moteur de sourcing.
+        </p>
+
+      </div>
+
+    `;
+
+
+    try {
+
+      const response = await fetch(
+        API_URL + "/api/search",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+
+            marque: brand,
+
+            modele: model,
+
+            annee_min: year,
+
+            km_max: km,
+
+            prix_max: buy,
+
+            pays: country
+
+          })
+
+        }
+      );
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          "Erreur serveur : " + response.status
+        );
+
+      }
+
+
+      const vehicles =
+        await response.json();
+
+
+      if (!Array.isArray(vehicles)) {
+
+        throw new Error(
+          "Réponse serveur invalide."
+        );
+
+      }
+
+
+      if (!vehicles.length) {
+
+        resultBox.innerHTML = `
+
+          <div class="panel">
+
+            <h2>
+              Aucune opportunité trouvée
+            </h2>
+
+            <p class="panel-sub">
+              Aucun véhicule ne correspond actuellement
+              à tes critères.
+            </p>
+
+            <div class="vehicle-info">
+
+              ${escapeHtml(brand || "Toutes marques")}
+              •
+              ${escapeHtml(model || "Tous modèles")}
+              •
+              ${escapeHtml(country || "Tous pays")}
+
+            </div>
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+
+      resultBox.innerHTML = `
+
+        <div class="panel">
+
+          <h2>
+            ${vehicles.length}
+            opportunité(s) trouvée(s)
+          </h2>
+
+          <p class="panel-sub">
+            Analyse KP Cars
+          </p>
+
+          ${vehicles
+            .map(vehicle => vehicleCard(vehicle))
+            .join("")}
+
+        </div>
+
+      `;
+
+    }
+
+    catch (error) {
+
+      console.error(error);
+
+
+      resultBox.innerHTML = `
+
+        <div class="panel">
+
+          <h2>
+            Erreur de connexion
+          </h2>
+
+          <p class="panel-sub">
+            Impossible de contacter le serveur KP Cars.
+          </p>
+
+          <div class="vehicle-info">
+
+            ${escapeHtml(error.message)}
+
+          </div>
+
+        </div>
+
+      `;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     STOCK
+  ========================================================= */
+
+  function getStock() {
+
+    try {
+
+      return JSON.parse(
+        localStorage.getItem("kpCarsStock") || "[]"
+      );
+
+    } catch {
+
+      return [];
+
+    }
+
+  }
+
+
+  function saveStock(stock) {
+
+    localStorage.setItem(
+      "kpCarsStock",
+      JSON.stringify(stock)
+    );
+
+  }
+
+
+  function addToStock(vehicle) {
+
+    const stock = getStock();
+
+
+    const sourceId =
+      vehicle.source_id ||
+      (
+        vehicle.marque +
+        "-" +
+        vehicle.modele +
+        "-" +
+        vehicle.annee +
+        "-" +
+        vehicle.kilometrage
+      );
+
+
+    const exists =
+      stock.some(
+        item => String(item.source_id) === String(sourceId)
+      );
+
+
+    if (exists) {
+
+      alert(
+        "Ce véhicule est déjà dans ton stock."
+      );
+
+      return;
+
+    }
+
+
+    vehicle.source_id = sourceId;
+
+    stock.push(vehicle);
+
+    saveStock(stock);
+
+    updateDashboardStock();
+
+    alert(
+      "Véhicule ajouté au stock KP Cars."
+    );
+
+  }
+
+
+  function removeFromStock(index) {
+
+    const stock = getStock();
+
+    stock.splice(index, 1);
+
+    saveStock(stock);
+
+    renderStock();
+
+    updateDashboardStock();
+
+  }
+
+
+  function renderStock() {
+
+    const box =
+      document.getElementById("stockList");
+
+
+    if (!box) {
+      return;
+    }
+
+
+    const stock = getStock();
+
+
+    if (!stock.length) {
+
+      box.innerHTML = `
+
+        <div class="stock-empty">
+
+          Aucun véhicule dans ton stock.
+
+          <br><br>
+
+          Ajoute une opportunité depuis
+          la page Sourcing.
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    box.innerHTML = stock
+      .map((vehicle, index) => {
+
+        return `
+
+          <div class="stock-item">
+
+            <h3>
+              ${escapeHtml(vehicle.marque || "")}
+              ${escapeHtml(vehicle.modele || "")}
+            </h3>
+
+            <div class="vehicle-info">
+
+              Année :
+              ${vehicle.annee || "—"}
+
+              <br>
+
+              Kilométrage :
+              ${Number(
+                vehicle.kilometrage || 0
+              ).toLocaleString("fr-FR")}
+              km
+
+              <br>
+
+              Prix achat :
+              ${euro(vehicle.prix_achat)}
+
+              <br>
+
+              Coût total :
+              ${euro(vehicle.cout_total)}
+
+              <br>
+
+              Marge nette :
+              ${euro(
+                vehicle.marge_nette ??
+                vehicle.marge
+              )}
+
+              <br>
+
+              ROI :
+              ${percentage(vehicle.roi)}
+
+            </div>
+
+
+            <button
+              class="stock-remove"
+              onclick="removeFromStock(${index})"
+            >
+              Supprimer
+            </button>
+
+          </div>
+
+        `;
+
+      })
+      .join("");
+
+  }
+
+
+  /* =========================================================
+     DASHBOARD STOCK
+  ========================================================= */
+
+  function updateDashboardStock() {
+
+    const counter =
+      document.getElementById(
+        "dashboardStockCount"
+      );
+
+
+    if (!counter) {
+      return;
+    }
+
+
+    counter.textContent =
+      getStock().length;
+
+  }
+
+
+  /* =========================================================
+     CALCULATEUR MANUEL
+  ========================================================= */
+
+  function calculateManual() {
+
+    const buy =
+      Number(
+        document.getElementById("calcBuy").value || 0
+      );
+
+
+    const transport =
+      Number(
+        document.getElementById("calcTransport").value || 0
+      );
+
+
+    const admin =
+      Number(
+        document.getElementById("calcAdmin").value || 0
+      );
+
+
+    const preparation =
+      Number(
+        document.getElementById("calcPrep").value || 0
+      );
+
+
+    const sell =
+      Number(
+        document.getElementById("calcSell").value || 0
+      );
+
+
+    const cost =
+      buy +
+      transport +
+      admin +
+      preparation;
+
+
+    const margin =
+      sell -
+      cost;
+
+
+    const roi =
+      cost > 0
+        ? (margin / cost) * 100
+        : 0;
+
+
+    document.getElementById(
+      "calcCost"
+    ).textContent = euro(cost);
+
+
+    document.getElementById(
+      "calcMargin"
+    ).textContent = euro(margin);
+
+
+    document.getElementById(
+      "calcROI"
+    ).textContent = percentage(roi);
+
+  }
+
+
+  /* =========================================================
+     INITIALISATION
+  ========================================================= */
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+      updateDashboardStock();
+
+      renderStock();
+
+      calculateManual();
+
+    }
+  );
 
 </script>
 
