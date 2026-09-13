@@ -1,214 +1,925 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KP Cars — Sourcing Automobile</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KP Cars — Sourcing</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #0b0b0b;
-      color: white;
-    }
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:#090909;
+  color:#fff;
+}
 
-    header {
-      padding: 25px 8%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #222;
-    }
+button,input,select{
+  font:inherit;
+}
 
-    .logo {
-      font-size: 28px;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
+button{
+  cursor:pointer;
+}
 
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin-left: 25px;
-    }
+.app{
+  display:flex;
+  min-height:100vh;
+}
 
-    .hero {
-      min-height: 80vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 8%;
-      background: linear-gradient(
-        rgba(0,0,0,.65),
-        rgba(0,0,0,.9)
-      );
-    }
+/* SIDEBAR */
 
-    .hero span {
-      color: #aaa;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-bottom: 20px;
-    }
+.sidebar{
+  width:250px;
+  background:#111;
+  border-right:1px solid #252525;
+  padding:28px 20px;
+  position:fixed;
+  top:0;
+  bottom:0;
+  left:0;
+}
 
-    h1 {
-      font-size: clamp(45px, 8vw, 90px);
-      line-height: .95;
-      max-width: 900px;
-      margin-bottom: 30px;
-    }
+.logo{
+  font-size:25px;
+  font-weight:900;
+  letter-spacing:3px;
+  margin-bottom:8px;
+}
 
-    .hero p {
-      max-width: 650px;
-      color: #bbb;
-      font-size: 20px;
-      line-height: 1.6;
-      margin-bottom: 35px;
-    }
+.logo-sub{
+  color:#777;
+  font-size:11px;
+  letter-spacing:2px;
+  margin-bottom:45px;
+}
 
-    .btn {
-      display: inline-block;
-      width: fit-content;
-      padding: 16px 28px;
-      background: white;
-      color: black;
-      text-decoration: none;
-      font-weight: bold;
-      border-radius: 4px;
-    }
+.menu{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
 
-    .section {
-      padding: 80px 8%;
-    }
+.menu button{
+  border:0;
+  background:transparent;
+  color:#888;
+  text-align:left;
+  padding:15px;
+  border-radius:8px;
+}
 
-    .section h2 {
-      font-size: 42px;
-      margin-bottom: 20px;
-    }
+.menu button:hover,
+.menu button.active{
+  background:#222;
+  color:#fff;
+}
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      margin-top: 40px;
-    }
+.main{
+  margin-left:250px;
+  width:calc(100% - 250px);
+  padding:35px;
+}
 
-    .card {
-      border: 1px solid #292929;
-      padding: 30px;
-      background: #111;
-    }
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:35px;
+}
 
-    .card h3 {
-      margin-bottom: 15px;
-      font-size: 22px;
-    }
+.topbar h1{
+  font-size:32px;
+}
 
-    .card p {
-      color: #999;
-      line-height: 1.5;
-    }
+.badge{
+  border:1px solid #333;
+  padding:10px 15px;
+  border-radius:30px;
+  color:#aaa;
+  font-size:13px;
+}
 
-    footer {
-      padding: 30px 8%;
-      border-top: 1px solid #222;
-      color: #777;
-    }
-  </style>
+/* PAGES */
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+/* CARDS */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+  margin-bottom:30px;
+}
+
+.stat{
+  background:#111;
+  border:1px solid #252525;
+  border-radius:12px;
+  padding:24px;
+}
+
+.stat-label{
+  color:#777;
+  font-size:13px;
+  margin-bottom:12px;
+}
+
+.stat-value{
+  font-size:30px;
+  font-weight:800;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+}
+
+.panel{
+  background:#111;
+  border:1px solid #252525;
+  border-radius:12px;
+  padding:25px;
+  margin-bottom:20px;
+}
+
+.panel h2{
+  margin-bottom:8px;
+  font-size:21px;
+}
+
+.panel-sub{
+  color:#777;
+  font-size:13px;
+  margin-bottom:25px;
+}
+
+/* SOURCING */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+
+.field label{
+  display:block;
+  color:#888;
+  font-size:12px;
+  margin-bottom:8px;
+}
+
+.field input,
+.field select{
+  width:100%;
+  background:#0b0b0b;
+  color:#fff;
+  border:1px solid #333;
+  border-radius:7px;
+  padding:13px;
+  outline:none;
+}
+
+.field input:focus,
+.field select:focus{
+  border-color:#777;
+}
+
+.full{
+  grid-column:1/-1;
+}
+
+.primary{
+  width:100%;
+  border:0;
+  background:#fff;
+  color:#000;
+  padding:15px;
+  border-radius:7px;
+  font-weight:800;
+  margin-top:20px;
+}
+
+.primary:hover{
+  background:#ddd;
+}
+
+/* VEHICLES */
+
+.vehicle{
+  border:1px solid #292929;
+  border-radius:10px;
+  padding:20px;
+  margin-bottom:15px;
+  background:#0d0d0d;
+}
+
+.vehicle-head{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.vehicle h3{
+  font-size:20px;
+  margin-bottom:8px;
+}
+
+.vehicle-info{
+  color:#888;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.margin{
+  font-size:24px;
+  font-weight:800;
+  text-align:right;
+}
+
+.good{
+  color:#fff;
+}
+
+.vehicle-actions{
+  display:flex;
+  gap:8px;
+  margin-top:15px;
+}
+
+.small-btn{
+  border:1px solid #333;
+  background:#181818;
+  color:#fff;
+  padding:9px 13px;
+  border-radius:6px;
+}
+
+.small-btn:hover{
+  background:#292929;
+}
+
+/* ANALYSIS */
+
+.result{
+  background:#0b0b0b;
+  border:1px solid #292929;
+  border-radius:10px;
+  padding:20px;
+  margin-top:20px;
+}
+
+.result-row{
+  display:flex;
+  justify-content:space-between;
+  padding:11px 0;
+  border-bottom:1px solid #222;
+  color:#aaa;
+}
+
+.result-row:last-child{
+  border-bottom:0;
+}
+
+.result-row strong{
+  color:#fff;
+}
+
+.big-result{
+  font-size:32px;
+  font-weight:900;
+  margin-top:20px;
+}
+
+/* MOBILE */
+
+.mobile-menu{
+  display:none;
+}
+
+@media(max-width:900px){
+
+  .sidebar{
+    display:none;
+  }
+
+  .main{
+    margin-left:0;
+    width:100%;
+    padding:20px;
+  }
+
+  .mobile-menu{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+  }
+
+  .mobile-menu button{
+    background:#181818;
+    border:1px solid #333;
+    color:#fff;
+    padding:10px 14px;
+    border-radius:7px;
+  }
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .full{
+    grid-column:auto;
+  }
+}
+
+@media(max-width:500px){
+
+  .stats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .stat{
+    padding:16px;
+  }
+
+  .stat-value{
+    font-size:24px;
+  }
+
+  .topbar h1{
+    font-size:25px;
+  }
+
+  .vehicle-head{
+    flex-direction:column;
+  }
+
+  .margin{
+    text-align:left;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <header>
-    <div class="logo">KP CARS</div>
+<div class="app">
 
-    <nav>
-      <a href="#services">Services</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </header>
+<!-- SIDEBAR -->
 
-  <section class="hero">
-    <span>Automotive Sourcing — Belgium / Europe</span>
+<aside class="sidebar">
 
-    <h1>
-      TROUVER.<br>
-      NÉGOCIER.<br>
-      IMPORTER.
-    </h1>
+  <div class="logo">KP CARS</div>
+  <div class="logo-sub">AUTOMOTIVE SOURCING</div>
 
-    <p>
-      KP Cars vous accompagne dans la recherche et l'acquisition
-      de véhicules sélectionnés en Europe.
+  <div class="menu">
+
+    <button class="active" onclick="showPage('dashboard',this)">
+      🏠 Dashboard
+    </button>
+
+    <button onclick="showPage('sourcing',this)">
+      🔎 Sourcing
+    </button>
+
+    <button onclick="showPage('stock',this)">
+      🚗 Stock
+    </button>
+
+    <button onclick="showPage('analyse',this)">
+      📊 Analyse
+    </button>
+
+  </div>
+
+</aside>
+
+<!-- MAIN -->
+
+<main class="main">
+
+<div class="mobile-menu">
+  <strong>KP CARS</strong>
+  <button onclick="toggleMobileMenu()">☰ Menu</button>
+</div>
+
+<div class="topbar">
+  <h1 id="pageTitle">Dashboard</h1>
+  <div class="badge">KP CARS • V1</div>
+</div>
+
+<!-- DASHBOARD -->
+
+<section id="dashboard" class="page active">
+
+<div class="stats">
+
+  <div class="stat">
+    <div class="stat-label">VÉHICULES EN STOCK</div>
+    <div class="stat-value" id="statStock">0</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-label">OPPORTUNITÉS</div>
+    <div class="stat-value" id="statOpp">0</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-label">VALEUR D'ACHAT</div>
+    <div class="stat-value" id="statBuy">0 €</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-label">MARGE POTENTIELLE</div>
+    <div class="stat-value" id="statMargin">0 €</div>
+  </div>
+
+</div>
+
+<div class="grid">
+
+<div class="panel">
+
+<h2>Bienvenue chez KP Cars</h2>
+
+<p class="panel-sub">
+Votre centre de sourcing automobile européen.
+</p>
+
+<p style="color:#aaa;line-height:1.7">
+Recherchez, analysez et gérez vos opportunités automobiles
+depuis une seule interface.
+</p>
+
+<button class="primary" onclick="showPage('sourcing')">
+LANCER UN SOURCING
+</button>
+
+</div>
+
+<div class="panel">
+
+<h2>KP Cars</h2>
+
+<p class="panel-sub">
+Objectif
+</p>
+
+<div style="font-size:28px;font-weight:900">
+BUY SMART.
+<br>
+SELL SMART.
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- SOURCING -->
+
+<section id="sourcing" class="page">
+
+<div class="panel">
+
+<h2>Recherche de véhicule</h2>
+
+<p class="panel-sub">
+Définissez vos critères d'achat.
+</p>
+
+<div class="form-grid">
+
+<div class="field">
+<label>MARQUE</label>
+<input id="brand" placeholder="Ex : Mercedes">
+</div>
+
+<div class="field">
+<label>MODÈLE</label>
+<input id="model" placeholder="Ex : A45 S AMG">
+</div>
+
+<div class="field">
+<label>ANNÉE MINIMUM</label>
+<input id="yearMin" type="number" placeholder="2020">
+</div>
+
+<div class="field">
+<label>KILOMÉTRAGE MAXIMUM</label>
+<input id="kmMax" type="number" placeholder="100000">
+</div>
+
+<div class="field">
+<label>PRIX D'ACHAT MAXIMUM (€)</label>
+<input id="buyMax" type="number" placeholder="30000">
+</div>
+
+<div class="field">
+<label>PAYS</label>
+<select id="country">
+<option>Allemagne</option>
+<option>Belgique</option>
+<option>France</option>
+<option>Pays-Bas</option>
+<option>Luxembourg</option>
+<option>Italie</option>
+</select>
+</div>
+
+</div>
+
+<button class="primary" onclick="runSearch()">
+🔎 ANALYSER LES OPPORTUNITÉS
+</button>
+
+</div>
+
+<div id="searchResult"></div>
+
+</section>
+
+<!-- STOCK -->
+
+<section id="stock" class="page">
+
+<div class="panel">
+
+<h2>Stock KP Cars</h2>
+
+<p class="panel-sub">
+Vos véhicules et opportunités enregistrés.
+</p>
+
+<div id="stockList"></div>
+
+</div>
+
+</section>
+
+<!-- ANALYSE -->
+
+<section id="analyse" class="page">
+
+<div class="panel">
+
+<h2>Calculateur de marge</h2>
+
+<p class="panel-sub">
+Calculez rapidement la rentabilité d'une opération.
+</p>
+
+<div class="form-grid">
+
+<div class="field">
+<label>PRIX D'ACHAT (€)</label>
+<input id="aBuy" type="number" value="10000">
+</div>
+
+<div class="field">
+<label>TRANSPORT / IMPORT (€)</label>
+<input id="aImport" type="number" value="700">
+</div>
+
+<div class="field">
+<label>REMISE EN ÉTAT (€)</label>
+<input id="aRepair" type="number" value="500">
+</div>
+
+<div class="field">
+<label>AUTRES FRAIS (€)</label>
+<input id="aOther" type="number" value="300">
+</div>
+
+<div class="field full">
+<label>PRIX DE REVENTE ESTIMÉ (€)</label>
+<input id="aSell" type="number" value="15000">
+</div>
+
+</div>
+
+<button class="primary" onclick="calculateMargin()">
+CALCULER LA MARGE
+</button>
+
+<div id="analysisResult"></div>
+
+</div>
+
+</section>
+
+</main>
+</div>
+
+<script>
+
+let stock = JSON.parse(localStorage.getItem("kpCarsStock") || "[]");
+
+function saveStock(){
+  localStorage.setItem("kpCarsStock",JSON.stringify(stock));
+  updateStats();
+  renderStock();
+}
+
+function showPage(page,button){
+
+  document.querySelectorAll(".page").forEach(p=>{
+    p.classList.remove("active");
+  });
+
+  document.getElementById(page).classList.add("active");
+
+  document.querySelectorAll(".menu button").forEach(b=>{
+    b.classList.remove("active");
+  });
+
+  if(button){
+    button.classList.add("active");
+  }
+
+  const titles={
+    dashboard:"Dashboard",
+    sourcing:"Sourcing",
+    stock:"Stock",
+    analyse:"Analyse"
+  };
+
+  document.getElementById("pageTitle").textContent=titles[page];
+
+  renderStock();
+  updateStats();
+
+  window.scrollTo(0,0);
+}
+
+function toggleMobileMenu(){
+  alert("Utilisez le menu principal sur ordinateur pour naviguer entre les sections.");
+}
+
+function runSearch(){
+
+  const brand=document.getElementById("brand").value || "Marque";
+  const model=document.getElementById("model").value || "Modèle";
+  const year=document.getElementById("yearMin").value || "—";
+  const km=document.getElementById("kmMax").value || "—";
+  const buy=document.getElementById("buyMax").value || "0";
+  const country=document.getElementById("country").value;
+
+  const buyPrice=Number(buy);
+
+  const estimatedSell=Math.round(buyPrice*1.22);
+  const costs=1000;
+  const margin=estimatedSell-buyPrice-costs;
+
+  document.getElementById("searchResult").innerHTML=`
+
+  <div class="panel">
+
+    <h2>Opportunité détectée</h2>
+
+    <p class="panel-sub">
+      Simulation basée sur vos critères.
     </p>
 
-    <a class="btn" href="#contact">
-      PARLER À KP CARS
-    </a>
-  </section>
+    <div class="vehicle">
 
-  <section class="section" id="services">
-    <h2>Notre expertise</h2>
+      <div class="vehicle-head">
 
-    <div class="cards">
+        <div>
 
-      <div class="card">
-        <h3>01 — Sourcing</h3>
-        <p>
-          Recherche de véhicules correspondant précisément
-          à vos critères et à votre budget.
-        </p>
+          <h3>${brand} ${model}</h3>
+
+          <div class="vehicle-info">
+            Pays : ${country}<br>
+            Année minimum : ${year}<br>
+            Kilométrage maximum : ${km} km<br>
+            Budget maximum : ${buyPrice.toLocaleString()} €
+          </div>
+
+        </div>
+
+        <div class="margin">
+          ${margin.toLocaleString()} €
+          <div style="font-size:11px;color:#777">
+            MARGE ESTIMÉE
+          </div>
+        </div>
+
       </div>
 
-      <div class="card">
-        <h3>02 — Négociation</h3>
-        <p>
-          Analyse du prix et négociation auprès des vendeurs
-          et professionnels européens.
-        </p>
-      </div>
+      <div class="vehicle-actions">
 
-      <div class="card">
-        <h3>03 — Import</h3>
-        <p>
-          Accompagnement dans les différentes étapes
-          de l'importation du véhicule vers la Belgique.
-        </p>
-      </div>
+        <button class="small-btn"
+          onclick='addVehicle(${JSON.stringify({
+            brand:brand,
+            model:model,
+            year:year,
+            km:km,
+            country:country,
+            buy:buyPrice,
+            sell:estimatedSell,
+            margin:margin
+          })})'>
+          + AJOUTER AU STOCK
+        </button>
 
-      <div class="card">
-        <h3>04 — Sélection</h3>
-        <p>
-          Une attention particulière portée à l'état,
-          l'historique et la cohérence du véhicule.
-        </p>
       </div>
 
     </div>
-  </section>
 
-  <section class="section" id="contact">
-    <h2>Votre prochaine voiture.</h2>
+  </div>
 
-    <p style="color:#999; max-width:600px; line-height:1.6; margin-bottom:30px;">
-      Donnez-nous vos critères. KP Cars s'occupe de trouver
-      les opportunités qui correspondent à votre projet.
-    </p>
+  `;
+}
 
-    <a class="btn" href="mailto:contact@kpcars.be">
-      CONTACTER KP CARS
-    </a>
-  </section>
+function addVehicle(vehicle){
 
-  <footer>
-    © 2026 KP Cars — Automotive Sourcing
-  </footer>
+  stock.push({
+    ...vehicle,
+    id:Date.now()
+  });
+
+  saveStock();
+
+  alert("Véhicule ajouté au stock KP Cars.");
+
+  showPage("stock");
+}
+
+function removeVehicle(id){
+
+  stock=stock.filter(v=>v.id!==id);
+
+  saveStock();
+}
+
+function renderStock(){
+
+  const container=document.getElementById("stockList");
+
+  if(!container) return;
+
+  if(stock.length===0){
+
+    container.innerHTML=`
+
+    <div style="padding:40px;text-align:center;color:#666">
+      Aucun véhicule dans le stock.<br><br>
+      Lancez un sourcing pour ajouter votre première opportunité.
+    </div>
+
+    `;
+
+    return;
+  }
+
+  container.innerHTML=stock.map(v=>`
+
+    <div class="vehicle">
+
+      <div class="vehicle-head">
+
+        <div>
+
+          <h3>${v.brand} ${v.model}</h3>
+
+          <div class="vehicle-info">
+            ${v.country}<br>
+            Année : ${v.year}<br>
+            Kilométrage max : ${Number(v.km).toLocaleString()} km<br>
+            Achat : ${Number(v.buy).toLocaleString()} €<br>
+            Revente estimée : ${Number(v.sell).toLocaleString()} €
+          </div>
+
+        </div>
+
+        <div class="margin">
+          ${Number(v.margin).toLocaleString()} €
+          <div style="font-size:11px;color:#777">
+            MARGE
+          </div>
+        </div>
+
+      </div>
+
+      <div class="vehicle-actions">
+
+        <button class="small-btn"
+          onclick="removeVehicle(${v.id})">
+          SUPPRIMER
+        </button>
+
+      </div>
+
+    </div>
+
+  `).join("");
+}
+
+function updateStats(){
+
+  document.getElementById("statStock").textContent=stock.length;
+
+  document.getElementById("statOpp").textContent=stock.length;
+
+  const buy=stock.reduce((sum,v)=>sum+Number(v.buy||0),0);
+
+  const margin=stock.reduce((sum,v)=>sum+Number(v.margin||0),0);
+
+  document.getElementById("statBuy").textContent=
+    buy.toLocaleString()+" €";
+
+  document.getElementById("statMargin").textContent=
+    margin.toLocaleString()+" €";
+}
+
+function calculateMargin(){
+
+  const buy=Number(document.getElementById("aBuy").value)||0;
+  const imp=Number(document.getElementById("aImport").value)||0;
+  const repair=Number(document.getElementById("aRepair").value)||0;
+  const other=Number(document.getElementById("aOther").value)||0;
+  const sell=Number(document.getElementById("aSell").value)||0;
+
+  const total=buy+imp+repair+other;
+
+  const margin=sell-total;
+
+  const percentage=
+    sell>0 ? ((margin/sell)*100).toFixed(1) : 0;
+
+  document.getElementById("analysisResult").innerHTML=`
+
+  <div class="result">
+
+    <div class="result-row">
+      <span>Prix d'achat</span>
+      <strong>${buy.toLocaleString()} €</strong>
+    </div>
+
+    <div class="result-row">
+      <span>Import / transport</span>
+      <strong>${imp.toLocaleString()} €</strong>
+    </div>
+
+    <div class="result-row">
+      <span>Remise en état</span>
+      <strong>${repair.toLocaleString()} €</strong>
+    </div>
+
+    <div class="result-row">
+      <span>Autres frais</span>
+      <strong>${other.toLocaleString()} €</strong>
+    </div>
+
+    <div class="result-row">
+      <span>Coût total</span>
+      <strong>${total.toLocaleString()} €</strong>
+    </div>
+
+    <div class="result-row">
+      <span>Revente estimée</span>
+      <strong>${sell.toLocaleString()} €</strong>
+    </div>
+
+    <div class="big-result">
+      ${margin.toLocaleString()} €
+      <div style="font-size:12px;color:#777">
+        MARGE POTENTIELLE • ${percentage}%
+      </div>
+    </div>
+
+  </div>
+
+  `;
+}
+
+updateStats();
+renderStock();
+
+</script>
 
 </body>
 </html>
