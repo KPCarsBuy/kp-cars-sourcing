@@ -679,7 +679,6 @@ function toggleMobileMenu(){
 }
 
 async function runSearch(){
-
   const brand = document.getElementById("brand").value || "";
   const model = document.getElementById("model").value || "";
   const year = document.getElementById("yearMin").value || "";
@@ -693,7 +692,7 @@ async function runSearch(){
     <div class="panel">
       <h2>Recherche en cours...</h2>
       <p class="panel-sub">
-        KP Cars interroge son moteur de sourcing.
+        KP Cars analyse les opportunités.
       </p>
     </div>
   `;
@@ -719,7 +718,9 @@ async function runSearch(){
     );
 
     if (!response.ok) {
-      throw new Error("Erreur serveur : " + response.status);
+      throw new Error(
+        "Erreur serveur : " + response.status
+      );
     }
 
     const vehicles = await response.json();
@@ -728,19 +729,17 @@ async function runSearch(){
 
       resultBox.innerHTML = `
         <div class="panel">
-
           <h2>Aucune opportunité trouvée</h2>
 
           <p class="panel-sub">
-            Aucun véhicule ne correspond actuellement à vos critères.
+            Aucun véhicule ne correspond à vos critères.
           </p>
 
           <div class="vehicle-info">
             ${brand || "Toutes marques"} •
             ${model || "Tous modèles"} •
-            ${country}
+            ${country || "Tous pays"}
           </div>
-
         </div>
       `;
 
@@ -750,53 +749,183 @@ async function runSearch(){
     resultBox.innerHTML = `
       <div class="panel">
 
-        <h2>${vehicles.length} opportunité(s) trouvée(s)</h2>
+        <h2>
+          ${vehicles.length} opportunité(s) trouvée(s)
+        </h2>
 
         <p class="panel-sub">
-          Résultats provenant du serveur KP Cars.
+          Analyse KP Cars
         </p>
 
-        ${vehicles.map(v => `
+        ${vehicles.map(v => {
 
-          <div class="vehicle">
+          let badgeClass = "";
 
-            <div class="vehicle-head">
+          if (v.score >= 80) {
+            badgeClass = "excellent";
+          } else if (v.score >= 60) {
+            badgeClass = "very-good";
+          } else if (v.score >= 40) {
+            badgeClass = "interesting";
+          } else {
+            badgeClass = "study";
+          }
 
-              <div>
+          return `
+            <div class="vehicle">
 
-                <h3>${v.marque} ${v.modele}</h3>
+              <div class="vehicle-head">
 
-                <div class="vehicle-info">
+                <div>
 
-                  Pays : ${v.source || country}<br>
+                  <h3>
+                    ${v.marque} ${v.modele}
+                  </h3>
 
-                  Année : ${v.annee || "—"}<br>
+                  <div class="vehicle-info">
 
-                  Kilométrage : ${Number(v.kilometrage || 0).toLocaleString()} km<br>
+                    Pays :
+                    ${v.pays || v.source || "—"}<br>
 
-                  Achat : ${Number(v.prix_achat || 0).toLocaleString()} €<br>
+                    Année :
+                    ${v.annee || "—"}<br>
 
-                  Revente : ${Number(v.prix_vente || 0).toLocaleString()} €
+                    Kilométrage :
+                    ${Number(
+                      v.kilometrage || 0
+                    ).toLocaleString()} km<br>
+
+                    Prix achat :
+                    ${Number(
+                      v.prix_achat || 0
+                    ).toLocaleString()} €<br>
+
+                    Transport :
+                    ${Number(
+                      v.frais_transport || 0
+                    ).toLocaleString()} €<br>
+
+                    Frais administratifs :
+                    ${Number(
+                      v.frais_admin || 0
+                    ).toLocaleString()} €<br>
+
+                    Préparation :
+                    ${Number(
+                      v.reserve_preparation || 0
+                    ).toLocaleString()} €<br>
+
+                    <strong>
+                      Coût total :
+                      ${Number(
+                        v.cout_total || 0
+                      ).toLocaleString()} €
+                    </strong>
+
+                  </div>
+
+                </div>
+
+                <div class="margin">
+
+                  ${Number(
+                    v.marge || 0
+                  ).toLocaleString()} €
+
+                  <div style="
+                    font-size:11px;
+                    color:#777
+                  ">
+                    MARGE NETTE
+                  </div>
 
                 </div>
 
               </div>
 
-              <div class="margin">
+              <div style="
+                margin-top:18px;
+                padding-top:15px;
+                border-top:1px solid #222;
+              ">
 
-                ${Number(v.marge || 0).toLocaleString()} €
+                <div style="
+                  display:flex;
+                  justify-content:space-between;
+                  align-items:center;
+                  gap:10px;
+                  flex-wrap:wrap;
+                ">
 
-                <div style="font-size:11px;color:#777">
-                  MARGE
+                  <div>
+
+                    <strong>
+                      ROI :
+                      ${Number(
+                        v.roi || 0
+                      ).toFixed(1)} %
+                    </strong>
+
+                    <br>
+
+                    <span style="
+                      color:#888;
+                      font-size:13px;
+                    ">
+                      Score KP Cars :
+                      ${v.score || 0}/100
+                    </span>
+
+                  </div>
+
+                  <div class="${badgeClass}" style="
+                    font-weight:700;
+                    letter-spacing:.5px;
+                  ">
+                    ${v.opportunite || "À ÉTUDIER"}
+                  </div>
+
                 </div>
+
+                ${
+                  v.url
+                    ? `
+                      <a
+                        href="${v.url}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style="
+                          display:block;
+                          margin-top:15px;
+                          text-align:center;
+                          padding:13px;
+                          border:1px solid #444;
+                          border-radius:8px;
+                          color:white;
+                          text-decoration:none;
+                          font-weight:700;
+                        "
+                      >
+                        🔗 VOIR L'ANNONCE
+                      </a>
+                    `
+                    : `
+                      <div style="
+                        margin-top:15px;
+                        color:#777;
+                        font-size:13px;
+                      ">
+                        Aucun lien d'annonce disponible
+                      </div>
+                    `
+                }
 
               </div>
 
             </div>
+          `;
 
-          </div>
-
-        `).join("")}
+        }).join("")}
 
       </div>
     `;
@@ -820,12 +949,8 @@ async function runSearch(){
 
       </div>
     `;
-
   }
-
 }
-
-function renderStock(){
 
   const container=document.getElementById("stockList");
 
