@@ -1,92 +1,94 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
+# ============================================================
+# CONFIGURATION KP CARS
+# ============================================================
+
+FRAIS_TRANSPORT = 750
+FRAIS_ADMIN = 250
+RESERVE_PREPARATION = 500
+
 
 # ============================================================
-# BASE KP CARS
+# VEHICULES DE TEST
+# IMPORTANT : ce sont des données de démonstration.
+# Ce ne sont PAS de vraies annonces mobile.de.
 # ============================================================
 
 vehicles = [
     {
-        "id": 1,
         "source": "mobile.de",
         "source_id": "TEST001",
-        "url": "",
-        "image_url": "",
-        "vendeur": "",
-        "ville": "",
-        "pays": "Allemagne",
         "marque": "Renault",
         "modele": "Clio",
         "annee": 2011,
         "kilometrage": 124500,
         "prix_achat": 3900,
-        "prix_vente": 6490
+        "prix_vente": 6490,
+        "pays": "Allemagne",
+        "url": ""
     },
     {
-        "id": 2,
         "source": "mobile.de",
         "source_id": "TEST002",
-        "url": "",
-        "image_url": "",
-        "vendeur": "",
-        "ville": "",
-        "pays": "Allemagne",
         "marque": "Renault",
         "modele": "Clio",
         "annee": 2010,
-        "kilometrage": 138000,
-        "prix_achat": 3200,
-        "prix_vente": 5990
+        "kilometrage": 118000,
+        "prix_achat": 4200,
+        "prix_vente": 6990,
+        "pays": "Allemagne",
+        "url": ""
     },
     {
-        "id": 3,
         "source": "mobile.de",
         "source_id": "TEST003",
-        "url": "",
-        "image_url": "",
-        "vendeur": "",
-        "ville": "",
-        "pays": "Allemagne",
-        "marque": "Renault",
-        "modele": "Clio",
-        "annee": 2009,
-        "kilometrage": 149000,
-        "prix_achat": 2800,
-        "prix_vente": 5490
-    },
-    {
-        "id": 4,
-        "source": "mobile.de",
-        "source_id": "TEST004",
-        "url": "",
-        "image_url": "",
-        "vendeur": "",
-        "ville": "",
-        "pays": "Allemagne",
         "marque": "Renault",
         "modele": "Clio",
         "annee": 2012,
-        "kilometrage": 112000,
+        "kilometrage": 108500,
         "prix_achat": 4500,
-        "prix_vente": 6990
+        "prix_vente": 7490,
+        "pays": "Allemagne",
+        "url": ""
+    },
+    {
+        "source": "mobile.de",
+        "source_id": "TEST004",
+        "marque": "Renault",
+        "modele": "Clio",
+        "annee": 2009,
+        "kilometrage": 139000,
+        "prix_achat": 3200,
+        "prix_vente": 5990,
+        "pays": "Allemagne",
+        "url": ""
     }
 ]
 
 
 # ============================================================
-# OUTIL : CONSTRUIRE LE LIEN MOBILE.DE
+# URL MOBILE.DE
 # ============================================================
 
 def build_source_url(source, source_id, url=""):
+    """
+    Construit uniquement une vraie URL mobile.de
+    lorsqu'on possède un véritable identifiant numérique.
+    Les véhicules TEST restent sans lien.
+    """
 
     if url:
         return url
 
-    if source.lower() == "mobile.de" and source_id:
+    if (
+        str(source).lower() == "mobile.de"
+        and str(source_id).isdigit()
+    ):
         return (
             "https://suchen.mobile.de/fahrzeuge/details.html?id="
             + str(source_id)
@@ -96,7 +98,7 @@ def build_source_url(source, source_id, url=""):
 
 
 # ============================================================
-# ANALYSE KP CARS
+# CALCUL KP CARS
 # ============================================================
 
 def enrich_vehicle(vehicle):
@@ -104,333 +106,274 @@ def enrich_vehicle(vehicle):
     prix_achat = float(vehicle.get("prix_achat") or 0)
     prix_vente = float(vehicle.get("prix_vente") or 0)
 
-    marge = prix_vente - prix_achat
+    transport = float(
+        vehicle.get("transport", FRAIS_TRANSPORT) or 0
+    )
 
-    if prix_achat > 0:
-        marge_pourcentage = (marge / prix_achat) * 100
+    frais_admin = float(
+        vehicle.get("frais_admin", FRAIS_ADMIN) or 0
+    )
+
+    preparation = float(
+        vehicle.get("preparation", RESERVE_PREPARATION) or 0
+    )
+
+    # --------------------------------------------------------
+    # COÛT RÉEL D'ACQUISITION
+    # --------------------------------------------------------
+
+    cout_total = (
+        prix_achat
+        + transport
+        + frais_admin
+        + preparation
+    )
+
+    # --------------------------------------------------------
+    # MARGE NETTE
+    # --------------------------------------------------------
+
+    marge_nette = prix_vente - cout_total
+
+    # --------------------------------------------------------
+    # ROI
+    # --------------------------------------------------------
+
+    if cout_total > 0:
+        roi = (marge_nette / cout_total) * 100
     else:
-        marge_pourcentage = 0
+        roi = 0
+
+    # --------------------------------------------------------
+    # SCORE KP CARS
+    # --------------------------------------------------------
 
     score = 0
 
     # Marge
-    if marge >= 3000:
+    if marge_nette >= 2000:
         score += 40
-    elif marge >= 2000:
+    elif marge_nette >= 1500:
+        score += 35
+    elif marge_nette >= 1000:
         score += 30
-    elif marge >= 1000:
+    elif marge_nette >= 700:
         score += 20
-    elif marge > 0:
+    elif marge_nette >= 400:
         score += 10
 
-    # Rentabilité
-    if marge_pourcentage >= 30:
+    # ROI
+    if roi >= 35:
         score += 30
-    elif marge_pourcentage >= 20:
+    elif roi >= 25:
+        score += 25
+    elif roi >= 20:
         score += 20
-    elif marge_pourcentage >= 10:
+    elif roi >= 15:
+        score += 15
+    elif roi >= 10:
         score += 10
+
+    # Age
+    annee = int(vehicle.get("annee") or 0)
+
+    if annee >= 2015:
+        score += 15
+    elif annee >= 2012:
+        score += 12
+    elif annee >= 2010:
+        score += 8
+    elif annee >= 2008:
+        score += 5
 
     # Kilométrage
     kilometrage = int(vehicle.get("kilometrage") or 0)
 
     if kilometrage <= 100000:
-        score += 20
+        score += 15
+    elif kilometrage <= 125000:
+        score += 12
     elif kilometrage <= 150000:
-        score += 10
+        score += 8
+    elif kilometrage <= 175000:
+        score += 4
 
-    # Année
-    annee = int(vehicle.get("annee") or 0)
+    # --------------------------------------------------------
+    # OPPORTUNITÉ
+    # --------------------------------------------------------
 
-    if annee >= 2018:
-        score += 10
-
-    vehicle["marge"] = round(marge, 2)
-    vehicle["marge_pourcentage"] = round(marge_pourcentage, 1)
-    vehicle["score"] = min(score, 100)
-
-    if vehicle["score"] >= 80:
-        vehicle["opportunite"] = "EXCELLENTE"
-    elif vehicle["score"] >= 60:
-        vehicle["opportunite"] = "TRÈS BONNE"
-    elif vehicle["score"] >= 40:
-        vehicle["opportunite"] = "INTÉRESSANTE"
+    if score >= 80:
+        opportunite = "EXCEPTIONNELLE"
+    elif score >= 65:
+        opportunite = "TRÈS BONNE"
+    elif score >= 50:
+        opportunite = "BONNE"
+    elif score >= 35:
+        opportunite = "MOYENNE"
     else:
-        vehicle["opportunite"] = "À ÉTUDIER"
+        opportunite = "FAIBLE"
 
-    vehicle["url"] = build_source_url(
+    # --------------------------------------------------------
+    # URL
+    # --------------------------------------------------------
+
+    url = build_source_url(
         vehicle.get("source", ""),
         vehicle.get("source_id", ""),
         vehicle.get("url", "")
     )
 
-    return vehicle
+    # --------------------------------------------------------
+    # RESULTAT FINAL
+    # --------------------------------------------------------
 
+    result = dict(vehicle)
 
-# ============================================================
-# INITIALISATION
-# ============================================================
-
-for vehicle in vehicles:
-    enrich_vehicle(vehicle)
-
-
-# ============================================================
-# ACCUEIL
-# ============================================================
-
-@app.route("/")
-def home():
-
-    return jsonify({
-        "status": "online",
-        "app": "KP Cars",
-        "message": "KP Cars API opérationnelle",
-        "vehicles": len(vehicles),
-        "sources": [
-            "mobile.de"
-        ]
+    result.update({
+        "transport": round(transport, 2),
+        "frais_admin": round(frais_admin, 2),
+        "preparation": round(preparation, 2),
+        "cout_total": round(cout_total, 2),
+        "marge_nette": round(marge_nette, 2),
+        "marge": round(marge_nette, 2),
+        "roi": round(roi, 2),
+        "score": min(score, 100),
+        "opportunite": opportunite,
+        "url": url
     })
 
+    return result
+
 
 # ============================================================
-# SANTÉ
+# API HEALTH
 # ============================================================
 
-@app.route("/api/health")
+@app.route("/api/health", methods=["GET"])
 def health():
 
     return jsonify({
-        "status": "healthy",
         "app": "KP Cars",
+        "status": "healthy",
         "vehicles": len(vehicles)
     })
 
 
 # ============================================================
-# TOUS LES VÉHICULES
+# API VEHICLES
 # ============================================================
 
 @app.route("/api/vehicles", methods=["GET"])
 def get_vehicles():
 
-    return jsonify(vehicles)
-
-
-# ============================================================
-# AJOUT D'UN VÉHICULE
-# ============================================================
-
-@app.route("/api/vehicles", methods=["POST"])
-def add_vehicle():
-
-    data = request.get_json() or {}
-
-    vehicle = {
-        "id": max(
-            [v["id"] for v in vehicles],
-            default=0
-        ) + 1,
-
-        "source": data.get("source", ""),
-        "source_id": data.get("source_id", ""),
-        "url": data.get("url", ""),
-        "image_url": data.get("image_url", ""),
-        "vendeur": data.get("vendeur", ""),
-        "ville": data.get("ville", ""),
-        "pays": data.get("pays", ""),
-
-        "marque": data.get("marque", ""),
-        "modele": data.get("modele", ""),
-        "annee": data.get("annee", 0),
-        "kilometrage": data.get("kilometrage", 0),
-
-        "prix_achat": data.get("prix_achat", 0),
-        "prix_vente": data.get("prix_vente", 0)
-    }
-
-    enrich_vehicle(vehicle)
-
-    vehicles.append(vehicle)
-
-    return jsonify(vehicle), 201
-
-
-# ============================================================
-# IMPORT D'UNE ANNONCE EXTERNE
-# ============================================================
-
-@app.route("/api/import/mobile", methods=["POST"])
-def import_mobile():
-
-    data = request.get_json() or {}
-
-    source_id = data.get("mobileAdId") or data.get("source_id")
-
-    if not source_id:
-        return jsonify({
-            "success": False,
-            "error": "mobileAdId manquant"
-        }), 400
-
-    vehicle = {
-        "id": max(
-            [v["id"] for v in vehicles],
-            default=0
-        ) + 1,
-
-        "source": "mobile.de",
-        "source_id": source_id,
-
-        "url": data.get("url", ""),
-
-        "image_url": data.get(
-            "image_url",
-            data.get("image", "")
-        ),
-
-        "vendeur": data.get(
-            "vendeur",
-            data.get("seller", "")
-        ),
-
-        "ville": data.get(
-            "ville",
-            data.get("location", "")
-        ),
-
-        "pays": data.get(
-            "pays",
-            "Allemagne"
-        ),
-
-        "marque": data.get(
-            "marque",
-            data.get("make", "")
-        ),
-
-        "modele": data.get(
-            "modele",
-            data.get("model", "")
-        ),
-
-        "annee": data.get(
-            "annee",
-            data.get("year", 0)
-        ),
-
-        "kilometrage": data.get(
-            "kilometrage",
-            data.get("mileage", 0)
-        ),
-
-        "prix_achat": data.get(
-            "prix_achat",
-            data.get("price", 0)
-        ),
-
-        "prix_vente": data.get(
-            "prix_vente",
-            data.get("estimated_sale_price", 0)
-        )
-    }
-
-    enrich_vehicle(vehicle)
-
-    vehicles.append(vehicle)
-
-    return jsonify({
-        "success": True,
-        "vehicle": vehicle
-    }), 201
-
-
-# ============================================================
-# SUPPRESSION
-# ============================================================
-
-@app.route("/api/vehicles/<int:vehicle_id>", methods=["DELETE"])
-def delete_vehicle(vehicle_id):
-
-    global vehicles
-
-    vehicles = [
-        vehicle
+    return jsonify([
+        enrich_vehicle(vehicle)
         for vehicle in vehicles
-        if vehicle["id"] != vehicle_id
-    ]
-
-    return jsonify({
-        "success": True
-    })
+    ])
 
 
 # ============================================================
-# MOTEUR DE SOURCING
+# API SEARCH
 # ============================================================
 
 @app.route("/api/search", methods=["POST"])
 def search():
 
-    criteria = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
+
+    marque = str(data.get("marque") or "").strip().lower()
+    modele = str(data.get("modele") or "").strip().lower()
+
+    annee_min = data.get("annee_min")
+    km_max = data.get("km_max")
+    prix_max = data.get("prix_max")
+
+    pays = str(data.get("pays") or "").strip().lower()
 
     results = []
 
-    marque = str(
-        criteria.get("marque") or ""
-    ).strip().lower()
-
-    modele = str(
-        criteria.get("modele") or ""
-    ).strip().lower()
-
-    pays = str(
-        criteria.get("pays") or ""
-    ).strip().lower()
-
-    annee_min = criteria.get("annee_min")
-    km_max = criteria.get("km_max")
-    prix_max = criteria.get("prix_max")
-
     for vehicle in vehicles:
 
+        # ----------------------------------------------------
         # MARQUE
+        # ----------------------------------------------------
+
         if marque:
-            if marque not in vehicle["marque"].lower():
+            if marque not in str(
+                vehicle.get("marque", "")
+            ).lower():
                 continue
 
-        # MODÈLE
+        # ----------------------------------------------------
+        # MODELE
+        # ----------------------------------------------------
+
         if modele:
-            if modele not in vehicle["modele"].lower():
+            if modele not in str(
+                vehicle.get("modele", "")
+            ).lower():
                 continue
 
-        # ANNÉE
+        # ----------------------------------------------------
+        # ANNÉE MINIMUM
+        # ----------------------------------------------------
+
         if annee_min:
-            if int(vehicle["annee"] or 0) < int(annee_min):
-                continue
+            try:
+                if int(vehicle.get("annee", 0)) < int(annee_min):
+                    continue
+            except:
+                pass
 
-        # KILOMÉTRAGE
+        # ----------------------------------------------------
+        # KILOMÉTRAGE MAXIMUM
+        # ----------------------------------------------------
+
         if km_max:
-            if int(vehicle["kilometrage"] or 0) > int(km_max):
-                continue
+            try:
+                if int(vehicle.get("kilometrage", 0)) > int(km_max):
+                    continue
+            except:
+                pass
 
-        # PRIX
+        # ----------------------------------------------------
+        # PRIX ACHAT MAXIMUM
+        # ----------------------------------------------------
+
         if prix_max:
-            if float(vehicle["prix_achat"] or 0) > float(prix_max):
+            try:
+                if float(vehicle.get("prix_achat", 0)) > float(prix_max):
+                    continue
+            except:
+                pass
+
+        # ----------------------------------------------------
+        # PAYS
+        # ----------------------------------------------------
+
+        if pays:
+            if pays not in str(
+                vehicle.get("pays", "")
+            ).lower():
                 continue
 
-        # PAYS
-        if pays:
-            if pays not in vehicle.get("pays", "").lower():
-                continue
+        # ----------------------------------------------------
+        # AJOUT
+        # ----------------------------------------------------
 
         results.append(
-            enrich_vehicle(vehicle.copy())
+            enrich_vehicle(vehicle)
         )
 
-    # Meilleures opportunités en premier
+    # --------------------------------------------------------
+    # TRI : MEILLEURES OPPORTUNITÉS EN PREMIER
+    # --------------------------------------------------------
+
     results.sort(
-        key=lambda x: x.get("score", 0),
+        key=lambda x: (
+            x.get("score", 0),
+            x.get("marge_nette", 0)
+        ),
         reverse=True
     )
 
@@ -438,11 +381,55 @@ def search():
 
 
 # ============================================================
-# LANCEMENT
+# IMPORT MOBILE.DE
+# ============================================================
+
+@app.route("/api/import/mobile", methods=["POST"])
+def import_mobile():
+
+    data = request.get_json(silent=True) or {}
+
+    mobile_ad_id = str(
+        data.get("mobileAdId") or ""
+    ).strip()
+
+    if not mobile_ad_id:
+        return jsonify({
+            "success": False,
+            "error": "mobileAdId obligatoire"
+        }), 400
+
+    url = (
+        "https://suchen.mobile.de/fahrzeuge/details.html?id="
+        + mobile_ad_id
+    )
+
+    return jsonify({
+        "success": True,
+        "mobileAdId": mobile_ad_id,
+        "url": url
+    })
+
+
+# ============================================================
+# ROOT
+# ============================================================
+
+@app.route("/", methods=["GET"])
+def root():
+
+    return jsonify({
+        "app": "KP Cars",
+        "message": "KP Cars API opérationnelle",
+        "status": "online"
+    })
+
+
+# ============================================================
+# START
 # ============================================================
 
 if __name__ == "__main__":
-
     app.run(
         host="0.0.0.0",
         port=5000,
