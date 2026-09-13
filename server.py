@@ -6,125 +6,97 @@ CORS(app)
 
 
 # ============================================================
-# BASE DE DONNÉES DE TEST KP CARS
+# BASE KP CARS
 # ============================================================
 
 vehicles = [
     {
         "id": 1,
+        "source": "mobile.de",
+        "source_id": "TEST001",
+        "url": "",
+        "image_url": "",
+        "vendeur": "",
+        "ville": "",
+        "pays": "Allemagne",
         "marque": "Renault",
         "modele": "Clio",
         "annee": 2011,
         "kilometrage": 124500,
         "prix_achat": 3900,
-        "prix_vente": 6490,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
+        "prix_vente": 6490
     },
     {
         "id": 2,
+        "source": "mobile.de",
+        "source_id": "TEST002",
+        "url": "",
+        "image_url": "",
+        "vendeur": "",
+        "ville": "",
+        "pays": "Allemagne",
         "marque": "Renault",
         "modele": "Clio",
         "annee": 2010,
         "kilometrage": 138000,
         "prix_achat": 3200,
-        "prix_vente": 5990,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
+        "prix_vente": 5990
     },
     {
         "id": 3,
+        "source": "mobile.de",
+        "source_id": "TEST003",
+        "url": "",
+        "image_url": "",
+        "vendeur": "",
+        "ville": "",
+        "pays": "Allemagne",
         "marque": "Renault",
         "modele": "Clio",
         "annee": 2009,
         "kilometrage": 149000,
         "prix_achat": 2800,
-        "prix_vente": 5490,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
+        "prix_vente": 5490
     },
     {
         "id": 4,
+        "source": "mobile.de",
+        "source_id": "TEST004",
+        "url": "",
+        "image_url": "",
+        "vendeur": "",
+        "ville": "",
+        "pays": "Allemagne",
         "marque": "Renault",
         "modele": "Clio",
         "annee": 2012,
         "kilometrage": 112000,
         "prix_achat": 4500,
-        "prix_vente": 6990,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
-    },
-    {
-        "id": 5,
-        "marque": "Volkswagen",
-        "modele": "Golf",
-        "annee": 2017,
-        "kilometrage": 98000,
-        "prix_achat": 10900,
-        "prix_vente": 14990,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
-    },
-    {
-        "id": 6,
-        "marque": "Volkswagen",
-        "modele": "Tiguan",
-        "annee": 2018,
-        "kilometrage": 105000,
-        "prix_achat": 16900,
-        "prix_vente": 21990,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
-    },
-    {
-        "id": 7,
-        "marque": "BMW",
-        "modele": "320d",
-        "annee": 2019,
-        "kilometrage": 89000,
-        "prix_achat": 18900,
-        "prix_vente": 23990,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
-    },
-    {
-        "id": 8,
-        "marque": "Mercedes-Benz",
-        "modele": "A45 AMG",
-        "annee": 2020,
-        "kilometrage": 78000,
-        "prix_achat": 36950,
-        "prix_vente": 44990,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
-    },
-    {
-        "id": 9,
-        "marque": "Audi",
-        "modele": "A3",
-        "annee": 2018,
-        "kilometrage": 92000,
-        "prix_achat": 13900,
-        "prix_vente": 18490,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
-    },
-    {
-        "id": 10,
-        "marque": "Peugeot",
-        "modele": "208",
-        "annee": 2019,
-        "kilometrage": 87000,
-        "prix_achat": 8900,
-        "prix_vente": 12990,
-        "source": "Allemagne",
-        "url": "https://www.mobile.de/"
+        "prix_vente": 6990
     }
 ]
 
 
 # ============================================================
-# CALCUL DE L'OPPORTUNITÉ
+# OUTIL : CONSTRUIRE LE LIEN MOBILE.DE
+# ============================================================
+
+def build_source_url(source, source_id, url=""):
+
+    if url:
+        return url
+
+    if source.lower() == "mobile.de" and source_id:
+        return (
+            "https://suchen.mobile.de/fahrzeuge/details.html?id="
+            + str(source_id)
+        )
+
+    return ""
+
+
+# ============================================================
+# ANALYSE KP CARS
 # ============================================================
 
 def enrich_vehicle(vehicle):
@@ -139,9 +111,9 @@ def enrich_vehicle(vehicle):
     else:
         marge_pourcentage = 0
 
-    # Score simple KP Cars
     score = 0
 
+    # Marge
     if marge >= 3000:
         score += 40
     elif marge >= 2000:
@@ -151,6 +123,7 @@ def enrich_vehicle(vehicle):
     elif marge > 0:
         score += 10
 
+    # Rentabilité
     if marge_pourcentage >= 30:
         score += 30
     elif marge_pourcentage >= 20:
@@ -158,6 +131,7 @@ def enrich_vehicle(vehicle):
     elif marge_pourcentage >= 10:
         score += 10
 
+    # Kilométrage
     kilometrage = int(vehicle.get("kilometrage") or 0)
 
     if kilometrage <= 100000:
@@ -165,6 +139,7 @@ def enrich_vehicle(vehicle):
     elif kilometrage <= 150000:
         score += 10
 
+    # Année
     annee = int(vehicle.get("annee") or 0)
 
     if annee >= 2018:
@@ -183,6 +158,12 @@ def enrich_vehicle(vehicle):
     else:
         vehicle["opportunite"] = "À ÉTUDIER"
 
+    vehicle["url"] = build_source_url(
+        vehicle.get("source", ""),
+        vehicle.get("source_id", ""),
+        vehicle.get("url", "")
+    )
+
     return vehicle
 
 
@@ -200,20 +181,39 @@ for vehicle in vehicles:
 
 @app.route("/")
 def home():
+
     return jsonify({
         "status": "online",
         "app": "KP Cars",
         "message": "KP Cars API opérationnelle",
+        "vehicles": len(vehicles),
+        "sources": [
+            "mobile.de"
+        ]
+    })
+
+
+# ============================================================
+# SANTÉ
+# ============================================================
+
+@app.route("/api/health")
+def health():
+
+    return jsonify({
+        "status": "healthy",
+        "app": "KP Cars",
         "vehicles": len(vehicles)
     })
 
 
 # ============================================================
-# LISTE DES VÉHICULES
+# TOUS LES VÉHICULES
 # ============================================================
 
 @app.route("/api/vehicles", methods=["GET"])
 def get_vehicles():
+
     return jsonify(vehicles)
 
 
@@ -227,15 +227,26 @@ def add_vehicle():
     data = request.get_json() or {}
 
     vehicle = {
-        "id": max([v["id"] for v in vehicles], default=0) + 1,
+        "id": max(
+            [v["id"] for v in vehicles],
+            default=0
+        ) + 1,
+
+        "source": data.get("source", ""),
+        "source_id": data.get("source_id", ""),
+        "url": data.get("url", ""),
+        "image_url": data.get("image_url", ""),
+        "vendeur": data.get("vendeur", ""),
+        "ville": data.get("ville", ""),
+        "pays": data.get("pays", ""),
+
         "marque": data.get("marque", ""),
         "modele": data.get("modele", ""),
         "annee": data.get("annee", 0),
         "kilometrage": data.get("kilometrage", 0),
+
         "prix_achat": data.get("prix_achat", 0),
-        "prix_vente": data.get("prix_vente", 0),
-        "source": data.get("source", ""),
-        "url": data.get("url", "")
+        "prix_vente": data.get("prix_vente", 0)
     }
 
     enrich_vehicle(vehicle)
@@ -243,6 +254,95 @@ def add_vehicle():
     vehicles.append(vehicle)
 
     return jsonify(vehicle), 201
+
+
+# ============================================================
+# IMPORT D'UNE ANNONCE EXTERNE
+# ============================================================
+
+@app.route("/api/import/mobile", methods=["POST"])
+def import_mobile():
+
+    data = request.get_json() or {}
+
+    source_id = data.get("mobileAdId") or data.get("source_id")
+
+    if not source_id:
+        return jsonify({
+            "success": False,
+            "error": "mobileAdId manquant"
+        }), 400
+
+    vehicle = {
+        "id": max(
+            [v["id"] for v in vehicles],
+            default=0
+        ) + 1,
+
+        "source": "mobile.de",
+        "source_id": source_id,
+
+        "url": data.get("url", ""),
+
+        "image_url": data.get(
+            "image_url",
+            data.get("image", "")
+        ),
+
+        "vendeur": data.get(
+            "vendeur",
+            data.get("seller", "")
+        ),
+
+        "ville": data.get(
+            "ville",
+            data.get("location", "")
+        ),
+
+        "pays": data.get(
+            "pays",
+            "Allemagne"
+        ),
+
+        "marque": data.get(
+            "marque",
+            data.get("make", "")
+        ),
+
+        "modele": data.get(
+            "modele",
+            data.get("model", "")
+        ),
+
+        "annee": data.get(
+            "annee",
+            data.get("year", 0)
+        ),
+
+        "kilometrage": data.get(
+            "kilometrage",
+            data.get("mileage", 0)
+        ),
+
+        "prix_achat": data.get(
+            "prix_achat",
+            data.get("price", 0)
+        ),
+
+        "prix_vente": data.get(
+            "prix_vente",
+            data.get("estimated_sale_price", 0)
+        )
+    }
+
+    enrich_vehicle(vehicle)
+
+    vehicles.append(vehicle)
+
+    return jsonify({
+        "success": True,
+        "vehicle": vehicle
+    }), 201
 
 
 # ============================================================
@@ -276,91 +376,65 @@ def search():
 
     results = []
 
-    marque = str(criteria.get("marque") or "").strip().lower()
-    modele = str(criteria.get("modele") or "").strip().lower()
+    marque = str(
+        criteria.get("marque") or ""
+    ).strip().lower()
+
+    modele = str(
+        criteria.get("modele") or ""
+    ).strip().lower()
+
+    pays = str(
+        criteria.get("pays") or ""
+    ).strip().lower()
 
     annee_min = criteria.get("annee_min")
     km_max = criteria.get("km_max")
     prix_max = criteria.get("prix_max")
-    pays = str(criteria.get("pays") or "").strip().lower()
 
     for vehicle in vehicles:
 
-        # -------------------------
         # MARQUE
-        # -------------------------
-
         if marque:
             if marque not in vehicle["marque"].lower():
                 continue
 
-        # -------------------------
         # MODÈLE
-        # -------------------------
-
         if modele:
             if modele not in vehicle["modele"].lower():
                 continue
 
-        # -------------------------
-        # ANNÉE MINIMUM
-        # -------------------------
-
+        # ANNÉE
         if annee_min:
             if int(vehicle["annee"] or 0) < int(annee_min):
                 continue
 
-        # -------------------------
-        # KILOMÉTRAGE MAXIMUM
-        # -------------------------
-
+        # KILOMÉTRAGE
         if km_max:
             if int(vehicle["kilometrage"] or 0) > int(km_max):
                 continue
 
-        # -------------------------
-        # PRIX MAXIMUM
-        # -------------------------
-
+        # PRIX
         if prix_max:
             if float(vehicle["prix_achat"] or 0) > float(prix_max):
                 continue
 
-        # -------------------------
         # PAYS
-        # -------------------------
-
         if pays:
-            if pays not in vehicle["source"].lower():
+            if pays not in vehicle.get("pays", "").lower():
                 continue
 
-        # -------------------------
-        # AJOUT DU RÉSULTAT
-        # -------------------------
-
-        results.append(enrich_vehicle(vehicle.copy()))
+        results.append(
+            enrich_vehicle(vehicle.copy())
+        )
 
     # Meilleures opportunités en premier
     results.sort(
-        key=lambda vehicle: vehicle.get("score", 0),
+        key=lambda x: x.get("score", 0),
         reverse=True
     )
 
     return jsonify(results)
-
-
-# ============================================================
-# SANTÉ DE L'API
-# ============================================================
-
-@app.route("/api/health")
-def health():
-
-    return jsonify({
-        "status": "healthy",
-        "app": "KP Cars",
-        "vehicles": len(vehicles)
-    })
 
 
 # ============================================================
