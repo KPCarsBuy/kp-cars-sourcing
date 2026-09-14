@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -417,12 +417,7 @@ def import_mobile():
 
 @app.route("/", methods=["GET"])
 def root():
-
-    return jsonify({
-        "app": "KP Cars",
-        "message": "KP Cars API opérationnelle",
-        "status": "online"
-    })
+    return send_from_directory(".", "index.html")
 
 
 # ============================================================
