@@ -1,19 +1,26 @@
-# KP Cars — gestion du stock (MVP)
+# KP Cars — gestion du stock
 
-Première version centrée sur la gestion manuelle des véhicules. Les annonces externes et les API sont volontairement mises en attente.
+Application privée pour suivre le stock de véhicules. Les annonces externes et les API de sourcing sont en attente.
 
-## Fonctionnalités
+## Fonctions
 
 - Ajouter, modifier et supprimer des véhicules.
-- Suivre année, kilométrage, prix d'achat, autres frais, revente prévue, statut et notes.
-- Voir les coûts engagés et les marges prévisionnelles du stock.
-- Rechercher, filtrer par statut et trier les véhicules.
+- Suivre l'année, le kilométrage, le prix d'achat, les frais, le statut et les notes.
+- Consulter les coûts engagés et la marge de revente estimée.
+- Rechercher, filtrer par statut et trier le stock.
+- Enregistrer les données partagées dans PostgreSQL.
 
-## Lancer sur PC
+## Configuration locale
 
 1. Installer Node.js 20 ou plus récent.
-2. Ouvrir un terminal dans ce dossier et lancer `npm install`.
-3. Lancer `npm start`.
-4. Ouvrir `http://localhost:3000` dans le navigateur.
+2. Copier `.env.example` dans `.env` et y renseigner `DATABASE_URL`, `APP_USER` et `APP_PASSWORD`.
+3. Ouvrir un terminal dans ce dossier et lancer `npm install`, puis `npm start`.
+4. Ouvrir `http://localhost:3000` et utiliser les identifiants définis dans `.env`.
 
-Les données sont enregistrées dans le stockage local du navigateur : elles restent sur ce navigateur et cet appareil. Elles ne sont pas encore synchronisées ni sauvegardées sur un serveur. Une base de données et des comptes utilisateur seront nécessaires avant un usage multi-appareils ou partagé.
+Au premier démarrage, l'application crée automatiquement la table `vehicles`. Le fichier `.env` ne doit jamais être ajouté à GitHub.
+
+## Déploiement Render
+
+Le service web doit recevoir les variables secrètes `DATABASE_URL`, `APP_USER` et `APP_PASSWORD`. Pour un service Render situé dans la même région que PostgreSQL, utiliser l'URL de connexion **interne** de la base.
+
+La base Render gratuite choisie pour ce MVP expire le **23 octobre 2026**. Elle n'inclut pas de sauvegardes. Exporter les données et passer à une base payante avant cette date pour conserver le stock.
