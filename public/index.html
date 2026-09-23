@@ -19,6 +19,7 @@
     *{font-family:Inter,"Segoe UI",Arial,sans-serif!important;font-style:normal!important}
     .vehicle h3{font-family:Georgia,"Times New Roman",serif!important;font-style:italic!important}
     .aiPanel{margin:20px 0}.aiHeader{display:flex;align-items:center;justify-content:space-between;gap:12px}.aiHeader h2{margin:0}.aiMessages{display:grid;gap:10px;max-height:420px;overflow:auto;margin:16px 0}.aiMessage{white-space:pre-wrap;line-height:1.6;padding:13px 15px;border:1px solid #333;border-radius:10px;background:#111}.aiMessage.user{border-left:3px solid #bbb}.aiMessage.assistant{border-left:3px solid #fff}.aiSources{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.aiSources a{color:#fff;text-decoration:underline;font-size:13px}.aiForm{display:flex;gap:9px;align-items:stretch}.aiForm input{flex:1;min-width:120px;height:44px}.aiStatus{min-height:20px}
+    [hidden]{display:none!important}.aiLauncher{position:fixed;right:22px;bottom:22px;z-index:5;width:68px;height:68px;border:1px solid #999;border-radius:50%;background:#111;color:#fff;box-shadow:0 8px 28px #0009;font:700 14px Inter,"Segoe UI",Arial,sans-serif;cursor:pointer}.aiLauncher:hover{background:#292929;transform:translateY(-2px)}.aiPanel{position:fixed;right:22px;bottom:104px;z-index:5;width:min(440px,calc(100vw - 32px));max-height:min(76vh,700px);overflow:auto;margin:0;padding:18px;background:#080808;border:1px solid #555;border-radius:16px;box-shadow:0 14px 48px #000c}.aiClose{border:1px solid #777;background:#171717;color:#fff;border-radius:8px;padding:7px 10px;cursor:pointer;font:inherit}.aiPanel .aiMessages{max-height:min(42vh,380px)}
     @media(max-width:520px){.aiHeader{align-items:flex-start;flex-direction:column}.aiForm{flex-direction:column}.aiForm .btn{width:100%}}
   </style>
 </head>
@@ -45,8 +46,9 @@
     <section class="panel"><div class="toolbar"><input id="search" type="search" placeholder="Rechercher marque ou modèle…" aria-label="Rechercher"><select id="statusFilter" aria-label="Filtrer par statut"><option value="">Tous les statuts</option><option>À préparer</option><option>En vente</option><option>Réservé</option><option>Vendu</option></select><select id="sort" aria-label="Trier"><option value="new">Plus récents</option><option value="margin">Marge décroissante</option><option value="price">Prix d’achat croissant</option></select></div></section>
     <div id="notice" class="hint" role="status" aria-live="polite"></div>
     <section id="list" class="list" aria-live="polite"></section>
-    <section class="panel aiPanel" aria-labelledby="aiTitle">
-      <div class="aiHeader"><div><h2 id="aiTitle">KP IA · Directeur adjoint</h2><p class="sub">Conseils de marchand, analyse des marges et recherche web sourcée.</p></div></div>
+    <button class="aiLauncher" id="aiToggle" type="button" aria-controls="aiPanel" aria-expanded="false" aria-label="Ouvrir KP IA">KP IA</button>
+    <section class="panel aiPanel" id="aiPanel" aria-labelledby="aiTitle" role="dialog" aria-modal="false" hidden>
+      <div class="aiHeader"><div><h2 id="aiTitle">KP IA · Directeur adjoint</h2><p class="sub">Conseils de marchand, analyse des marges et recherche web sourcée.</p></div><button class="aiClose" id="aiClose" type="button" aria-label="Fermer KP IA">Fermer ✕</button></div>
       <div id="aiMessages" class="aiMessages" aria-live="polite"><div class="aiMessage assistant">Bonjour, je suis KP IA. Demande-moi d’analyser un véhicule, son prix ou les prochaines actions sur ton stock.</div></div>
       <form id="aiForm" class="aiForm"><input id="aiPrompt" type="text" maxlength="1200" placeholder="Ex. À quel prix afficher la Clio 3 ?" aria-label="Question à KP IA" required><button class="btn" id="aiSend" type="submit">Demander à KP IA</button></form>
       <p id="aiStatus" class="hint aiStatus" role="status" aria-live="polite"></p>
@@ -140,6 +142,9 @@
       finally{$('aiSend').disabled=false;}
     };
     $('addBtn').onclick=()=>openForm();$('cancelBtn').onclick=closeForm;
+    function setAiOpen(open){$('aiPanel').hidden=!open;$('aiToggle').hidden=open;$('aiToggle').setAttribute('aria-expanded',String(open));if(open)$('aiPrompt').focus();else $('aiToggle').focus();}
+    $('aiToggle').onclick=()=>setAiOpen(true);$('aiClose').onclick=()=>setAiOpen(false);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('aiPanel').hidden)setAiOpen(false)});
     $('overlay').onclick=e=>{if(e.target===$('overlay'))closeForm()};
     $('search').oninput=render;$('statusFilter').onchange=render;$('sort').onchange=render;
     $('vehicleForm').onsubmit=async e=>{
