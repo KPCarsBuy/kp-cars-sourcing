@@ -18,6 +18,8 @@
     .overlay{background:rgba(0,0,0,.88)!important}
     *{font-family:Inter,"Segoe UI",Arial,sans-serif!important;font-style:normal!important}
     .vehicle h3{font-family:Georgia,"Times New Roman",serif!important;font-style:italic!important}
+    .aiPanel{margin:20px 0}.aiHeader{display:flex;align-items:center;justify-content:space-between;gap:12px}.aiHeader h2{margin:0}.aiMessages{display:grid;gap:10px;max-height:420px;overflow:auto;margin:16px 0}.aiMessage{white-space:pre-wrap;line-height:1.6;padding:13px 15px;border:1px solid #333;border-radius:10px;background:#111}.aiMessage.user{border-left:3px solid #bbb}.aiMessage.assistant{border-left:3px solid #fff}.aiSources{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.aiSources a{color:#fff;text-decoration:underline;font-size:13px}.aiForm{display:flex;gap:9px;align-items:stretch}.aiForm input{flex:1;min-width:120px;height:44px}.aiStatus{min-height:20px}
+    @media(max-width:520px){.aiHeader{align-items:flex-start;flex-direction:column}.aiForm{flex-direction:column}.aiForm .btn{width:100%}}
   </style>
 </head>
 <body>
@@ -43,6 +45,13 @@
     <section class="panel"><div class="toolbar"><input id="search" type="search" placeholder="Rechercher marque ou modèle…" aria-label="Rechercher"><select id="statusFilter" aria-label="Filtrer par statut"><option value="">Tous les statuts</option><option>À préparer</option><option>En vente</option><option>Réservé</option><option>Vendu</option></select><select id="sort" aria-label="Trier"><option value="new">Plus récents</option><option value="margin">Marge décroissante</option><option value="price">Prix d’achat croissant</option></select></div></section>
     <div id="notice" class="hint" role="status" aria-live="polite"></div>
     <section id="list" class="list" aria-live="polite"></section>
+    <section class="panel aiPanel" aria-labelledby="aiTitle">
+      <div class="aiHeader"><div><h2 id="aiTitle">KP IA · Directeur adjoint</h2><p class="sub">Conseils de marchand, analyse des marges et recherche web sourcée.</p></div></div>
+      <div id="aiMessages" class="aiMessages" aria-live="polite"><div class="aiMessage assistant">Bonjour, je suis KP IA. Demande-moi d’analyser un véhicule, son prix ou les prochaines actions sur ton stock.</div></div>
+      <form id="aiForm" class="aiForm"><input id="aiPrompt" type="text" maxlength="1200" placeholder="Ex. À quel prix afficher la Clio 3 ?" aria-label="Question à KP IA" required><button class="btn" id="aiSend" type="submit">Demander à KP IA</button></form>
+      <p id="aiStatus" class="hint aiStatus" role="status" aria-live="polite"></p>
+      <p class="hint">Pour chaque question, KP IA transmet la question et les données des véhicules à OpenAI (sans les notes libres) et fait une recherche web. Ses réponses citent les sources disponibles ; les décisions restent les tiennes.</p>
+    </section>
     <p class="hint">Le stock est enregistré sur le serveur KP Cars. Les annonces externes et les API de sourcing restent en attente.</p>
     <p class="footer">KP Cars · Gestion interne du stock</p>
   </main>
@@ -70,6 +79,7 @@
     const euros=n=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n)||0);
     const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     let cars=[];
+    const aiHistory=[];
     async function api(url,options={}){
       const response=await fetch(url,{...options,headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});
       if(response.status===204)return null;
@@ -109,6 +119,18 @@
     function openForm(id=''){const car=cars.find(c=>c.id===id);$('vehicleForm').reset();$('vehicleId').value=car?.id||'';$('dialogTitle').textContent=car?'Modifier le véhicule':'Ajouter un véhicule';if(car)for(const k of ['make','model','year','mileage','buyPrice','otherCosts','resalePrice','status','notes'])$(k).value=car[k]??(k==='otherCosts'?0:'');$('overlay').classList.add('open');$('make').focus()}
     function closeForm(){$('overlay').classList.remove('open')}
     async function removeCar(id){const c=cars.find(x=>x.id===id);if(c&&confirm(`Supprimer ${c.make} ${c.model} du stock ?`)){try{await api(`/api/vehicles/${encodeURIComponent(id)}`,{method:'DELETE'});cars=await api('/api/vehicles');$('notice').textContent='Véhicule supprimé.';render();}catch(error){$('notice').textContent=error.message;}}}
+    function addAiMessage(role,content,sources=[]){
+      const bubble=document.createElement('div');bubble.className=`aiMessage ${role}`;bubble.textContent=content;
+      if(sources.length){const links=document.createElement('div');links.className='aiSources';for(const source of sources){if(!source.url||!source.url.startsWith('https://'))continue;const link=document.createElement('a');link.href=source.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=source.title||new URL(source.url).hostname;links.appendChild(link);}bubble.appendChild(links);}
+      $('aiMessages').appendChild(bubble);$('aiMessages').scrollTop=$('aiMessages').scrollHeight;
+    }
+    $('aiForm').onsubmit=async e=>{
+      e.preventDefault();const message=$('aiPrompt').value.trim();if(!message)return;
+      addAiMessage('user',message);$('aiPrompt').value='';$('aiStatus').textContent='KP IA consulte le web et analyse ton stock…';$('aiSend').disabled=true;
+      try{const response=await api('/api/ai/chat',{method:'POST',body:JSON.stringify({message,history:aiHistory.slice(-8)})});aiHistory.push({role:'user',content:message},{role:'assistant',content:response.answer});addAiMessage('assistant',response.answer,response.sources||[]);$('aiStatus').textContent='';}
+      catch(error){addAiMessage('assistant',error.message);$('aiStatus').textContent='';}
+      finally{$('aiSend').disabled=false;}
+    };
     $('addBtn').onclick=()=>openForm();$('cancelBtn').onclick=closeForm;
     $('overlay').onclick=e=>{if(e.target===$('overlay'))closeForm()};
     $('search').oninput=render;$('statusFilter').onchange=render;$('sort').onchange=render;
