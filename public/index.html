@@ -116,6 +116,14 @@
         render();
       }catch(error){$('notice').textContent=error.message;}
     }
+    async function loadAiStatus(){
+      try{
+        const state=await api('/api/ai/status');
+        $('aiSend').disabled=!state.configured;
+        $('aiPrompt').disabled=!state.configured;
+        $('aiStatus').textContent=state.configured?'':'KP IA est prêt. Il reste à ajouter la clé API OpenAI dans Render.';
+      }catch(error){$('aiStatus').textContent=error.message;}
+    }
     function openForm(id=''){const car=cars.find(c=>c.id===id);$('vehicleForm').reset();$('vehicleId').value=car?.id||'';$('dialogTitle').textContent=car?'Modifier le véhicule':'Ajouter un véhicule';if(car)for(const k of ['make','model','year','mileage','buyPrice','otherCosts','resalePrice','status','notes'])$(k).value=car[k]??(k==='otherCosts'?0:'');$('overlay').classList.add('open');$('make').focus()}
     function closeForm(){$('overlay').classList.remove('open')}
     async function removeCar(id){const c=cars.find(x=>x.id===id);if(c&&confirm(`Supprimer ${c.make} ${c.model} du stock ?`)){try{await api(`/api/vehicles/${encodeURIComponent(id)}`,{method:'DELETE'});cars=await api('/api/vehicles');$('notice').textContent='Véhicule supprimé.';render();}catch(error){$('notice').textContent=error.message;}}}
@@ -145,11 +153,11 @@
       e.preventDefault();$('loginError').textContent='';
       try{
         await api('/api/login',{method:'POST',body:JSON.stringify({username:$('loginUser').value,password:$('loginPassword').value})});
-        $('loginPassword').value='';$('loginScreen').hidden=true;$('stockApp').hidden=false;await loadInventory();
+        $('loginPassword').value='';$('loginScreen').hidden=true;$('stockApp').hidden=false;await loadInventory();await loadAiStatus();
       }catch(error){$('loginError').textContent=error.message;}
     };
     async function restoreSession(){
-      try{await api('/api/session');$('loginScreen').hidden=true;$('stockApp').hidden=false;await loadInventory();}
+      try{await api('/api/session');$('loginScreen').hidden=true;$('stockApp').hidden=false;await loadInventory();await loadAiStatus();}
       catch(error){$('loginScreen').hidden=false;$('stockApp').hidden=true;if(error.message!=='Connexion requise.')$('loginError').textContent=error.message;}
     }
     restoreSession();
