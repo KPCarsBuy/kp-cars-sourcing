@@ -18,8 +18,9 @@
       <div class="stat"><small>Marge prévisionnelle</small><strong id="margin">0 €</strong></div>
     </section>
     <section class="panel"><div class="toolbar"><input id="search" type="search" placeholder="Rechercher marque ou modèle…" aria-label="Rechercher"><select id="statusFilter" aria-label="Filtrer par statut"><option value="">Tous les statuts</option><option>À préparer</option><option>En vente</option><option>Réservé</option><option>Vendu</option></select><select id="sort" aria-label="Trier"><option value="new">Plus récents</option><option value="margin">Marge décroissante</option><option value="price">Prix d’achat croissant</option></select></div></section>
+    <div id="notice" class="hint" role="status" aria-live="polite"></div>
     <section id="list" class="list" aria-live="polite"></section>
-    <p class="hint">Les données de cette première version sont enregistrées dans le navigateur utilisé. Elles ne sont pas encore synchronisées entre plusieurs appareils. Aucune annonce ni API externe n’est connectée.</p>
+    <p class="hint">Le stock est enregistré sur le serveur KP Cars. Les annonces externes et les API de sourcing restent en attente.</p>
     <p class="footer">KP Cars · Gestion interne du stock</p>
   </main>
   <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
@@ -45,9 +46,14 @@
     const $=id=>document.getElementById(id);
     const euros=n=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n)||0);
     const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    let cars=load();
-    function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
-    function save(){localStorage.setItem(KEY,JSON.stringify(cars));render()}
+    let cars=[];
+    async function api(url,options={}){
+      const response=await fetch(url,{...options,headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});
+      if(response.status===204)return null;
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(result.error|| (response.status===401?'Connexion requise. Recharge la page et connecte-toi.':'Impossible de contacter le serveur.'));
+      return result;
+    }
     function cost(c){return Number(c.buyPrice||0)+Number(c.otherCosts||0)}
     function margin(c){return Number(c.resalePrice||0)-cost(c)}
     function render(){
@@ -61,18 +67,36 @@
       if($('sort').value==='margin')shown.sort((a,b)=>margin(b)-margin(a));
       if($('sort').value==='price')shown.sort((a,b)=>Number(a.buyPrice)-Number(b.buyPrice));
       if($('sort').value==='new')shown.sort((a,b)=>b.updatedAt-a.updatedAt);
-      $('list').innerHTML=shown.length?shown.map(c=>`<article class="vehicle"><div><h3>${safe(c.make)} ${safe(c.model)}</h3><div class="muted">${c.year||'Année inconnue'}${c.mileage?` · ${Number(c.mileage).toLocaleString('fr-BE')} km`:''}</div><span class="status s-${safe(c.status).replaceAll(' ','\\ ')}">${safe(c.status)}</span>${c.notes?`<p class="muted">${safe(c.notes)}</p>`:''}</div><div class="metric"><small>Coût total</small><strong>${euros(cost(c))}</strong></div><div class="metric"><small>Revente prévue</small><strong>${euros(c.resalePrice)}</strong></div><div class="metric"><small>Marge prévue</small><strong>${euros(margin(c))}</strong></div><div class="actions"><button class="linkbtn" data-edit="${c.id}">Modifier</button><button class="linkbtn" data-delete="${c.id}" aria-label="Supprimer ${safe(c.make)} ${safe(c.model)}">Supprimer</button></div></article>`).join(''):'<div class="panel empty">Aucun véhicule dans le stock pour ces critères. Clique sur « Ajouter un véhicule » pour commencer.</div>';
+      $('list').innerHTML=shown.length?shown.map(c=>`<article class="vehicle"><div><h3>${safe(c.make)} ${safe(c.model)}</h3><div class="muted">${c.year||'Année inconnue'}${c.mileage?` · ${Number(c.mileage).toLocaleString('fr-BE')} km`:''}</div><span class="status">${safe(c.status)}</span>${c.notes?`<p class="muted">${safe(c.notes)}</p>`:''}</div><div class="metric"><small>Coût total</small><strong>${euros(cost(c))}</strong></div><div class="metric"><small>Revente prévue</small><strong>${euros(c.resalePrice)}</strong></div><div class="metric"><small>Marge prévue</small><strong>${euros(margin(c))}</strong></div><div class="actions"><button class="linkbtn" data-edit="${c.id}">Modifier</button><button class="linkbtn" data-delete="${c.id}" aria-label="Supprimer ${safe(c.make)} ${safe(c.model)}">Supprimer</button></div></article>`).join(''):'<div class="panel empty">Aucun véhicule dans le stock pour ces critères. Clique sur « Ajouter un véhicule » pour commencer.</div>';
       $('list').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openForm(b.dataset.edit));
       $('list').querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>removeCar(b.dataset.delete));
     }
+    async function loadInventory(){
+      $('notice').textContent='Chargement du stock…';
+      try{
+        cars=await api('/api/vehicles');
+        if(!cars.length&&localStorage.getItem(KEY)&&localStorage.getItem(KEY+'.migrated')!=='yes'){
+          const old=JSON.parse(localStorage.getItem(KEY)||'[]');
+          if(Array.isArray(old)&&old.length){cars=await api('/api/vehicles/migrate',{method:'POST',body:JSON.stringify({records:old})});localStorage.setItem(KEY+'.migrated','yes');}
+        }
+        $('notice').textContent='Stock synchronisé avec la base de données.';
+        render();
+      }catch(error){$('notice').textContent=error.message;}
+    }
     function openForm(id=''){const car=cars.find(c=>c.id===id);$('vehicleForm').reset();$('vehicleId').value=car?.id||'';$('dialogTitle').textContent=car?'Modifier le véhicule':'Ajouter un véhicule';if(car)for(const k of ['make','model','year','mileage','buyPrice','otherCosts','resalePrice','status','notes'])$(k).value=car[k]??(k==='otherCosts'?0:'');$('overlay').classList.add('open');$('make').focus()}
     function closeForm(){$('overlay').classList.remove('open')}
-    function removeCar(id){const c=cars.find(x=>x.id===id);if(c&&confirm(`Supprimer ${c.make} ${c.model} du stock ?`)){cars=cars.filter(x=>x.id!==id);save()}}
+    async function removeCar(id){const c=cars.find(x=>x.id===id);if(c&&confirm(`Supprimer ${c.make} ${c.model} du stock ?`)){try{await api(`/api/vehicles/${encodeURIComponent(id)}`,{method:'DELETE'});cars=await api('/api/vehicles');$('notice').textContent='Véhicule supprimé.';render();}catch(error){$('notice').textContent=error.message;}}}
     $('addBtn').onclick=()=>openForm();$('cancelBtn').onclick=closeForm;
     $('overlay').onclick=e=>{if(e.target===$('overlay'))closeForm()};
     $('search').oninput=render;$('statusFilter').onchange=render;$('sort').onchange=render;
-    $('vehicleForm').onsubmit=e=>{e.preventDefault();const id=$('vehicleId').value;const prev=cars.find(c=>c.id===id);const record={id:id||crypto.randomUUID(),updatedAt:Date.now()};for(const k of ['make','model','status','notes'])record[k]=$(k).value.trim();for(const k of ['year','mileage','buyPrice','otherCosts','resalePrice'])record[k]=Number($(k).value)||0;if(prev)cars=cars.map(c=>c.id===id?record:c);else cars.push(record);save();closeForm()};
-    render();
+    $('vehicleForm').onsubmit=async e=>{
+      e.preventDefault();const id=$('vehicleId').value;const record={};
+      for(const k of ['make','model','status','notes'])record[k]=$(k).value.trim();
+      for(const k of ['year','mileage','buyPrice','otherCosts','resalePrice'])record[k]=Number($(k).value)||0;
+      try{await api(id?`/api/vehicles/${encodeURIComponent(id)}`:'/api/vehicles',{method:id?'PUT':'POST',body:JSON.stringify(record)});cars=await api('/api/vehicles');closeForm();$('notice').textContent='Véhicule enregistré dans la base de données.';render();}
+      catch(error){$('notice').textContent=error.message;}
+    };
+    loadInventory();
   </script>
 </body>
 </html>
