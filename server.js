@@ -195,6 +195,27 @@ app.get('/api/ai/status', requireSession, (_req, res) => {
   res.json({ configured: Boolean(process.env.OPENAI_API_KEY) });
 });
 
+app.get('/api/notifications', async (_req, res, next) => {
+  try {
+    const { rows } = await pool.query(`SELECT id, title, message, source, url, created_at, read_at
+      FROM notifications ORDER BY created_at DESC LIMIT 50`);
+    const unread = await pool.query('SELECT COUNT(*)::int AS count FROM notifications WHERE read_at IS NULL');
+    res.json({ items: rows.map((row) => ({
+      id: row.id, title: row.title, message: row.message, source: row.source, url: row.url,
+      createdAt: new Date(row.created_at).getTime(), readAt: row.read_at ? new Date(row.read_at).getTime() : null
+    })), unreadCount: unread.rows[0].count });
+  } catch (error) { next(error); }
+});
+
+app.post('/api/notifications/:id/read', async (req, res, next) => {
+  try {
+    if (!/^[0-9a-f-]{36}$/i.test(req.params.id)) return res.status(400).json({ error: 'Identifiant de notification invalide.' });
+    const { rowCount } = await pool.query('UPDATE notifications SET read_at=COALESCE(read_at,NOW()) WHERE id=$1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ error: 'Notification introuvable.' });
+    res.status(204).end();
+  } catch (error) { next(error); }
+});
+
 app.get('/api/vehicles', async (_req, res, next) => {
   try {
     const { rows } = await pool.query(`SELECT ${selectColumns} FROM vehicles ORDER BY updated_at DESC`);
@@ -292,6 +313,15 @@ async function start() {
       notes TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS notifications (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      source TEXT NOT NULL DEFAULT '',
+      url TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      read_at TIMESTAMPTZ
     )`);
   }
   app.listen(port, '0.0.0.0', () => console.log(`KP Cars listening on port ${port}`));
