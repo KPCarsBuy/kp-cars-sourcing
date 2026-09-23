@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#101820">
+  <title>KP Cars | Gestion du stock</title>
+  <style>
+    :root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#17232c;background:#f3f6f7;font-synthesis:none}*{box-sizing:border-box}body{margin:0}.top{background:#101820;color:#fff;padding:20px max(20px,calc((100% - 1160px)/2));display:flex;align-items:center;justify-content:space-between}.brand{font-weight:900;letter-spacing:.09em}.brand span{color:#e1b44c}.top small{color:#b8c2c9}.wrap{max-width:1160px;margin:30px auto;padding:0 18px}.heading{display:flex;gap:14px;align-items:center;justify-content:space-between;margin-bottom:20px}.heading h1{margin:0 0 5px;font-size:clamp(26px,4vw,36px)}.sub{color:#65737c;margin:0}.btn{border:0;border-radius:8px;background:#d7aa42;color:#14202a;padding:12px 16px;font:700 14px inherit;cursor:pointer}.btn:hover{background:#e8bf5e}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px;margin:20px 0}.stat,.panel,.vehicle{background:#fff;border:1px solid #e0e7eb;border-radius:12px}.stat{padding:17px}.stat small{color:#71808a}.stat strong{display:block;font-size:25px;margin-top:7px}.panel{padding:16px;margin:16px 0}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toolbar input,.toolbar select{height:40px;border:1px solid #ccd6dc;border-radius:8px;padding:0 10px;background:#fff;font:inherit}.toolbar input{flex:1;min-width:200px}.list{display:grid;gap:11px}.vehicle{padding:16px;display:grid;grid-template-columns:minmax(170px,1.5fr) repeat(3,minmax(95px,1fr)) auto;gap:12px;align-items:center}.vehicle h3{margin:0 0 5px}.muted{color:#74818a;font-size:13px}.metric small{display:block;color:#76848d;margin-bottom:4px}.metric strong{font-size:15px}.status{display:inline-block;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:800;background:#edf2f4}.s-En\ vente{background:#e4f4ec;color:#226544}.s-Réservé{background:#fff1d1;color:#815c12}.s-Vendu{background:#e8eafa;color:#444d85}.actions{display:flex;gap:7px}.linkbtn{border:1px solid #d5dfe4;border-radius:7px;padding:7px 9px;background:white;cursor:pointer;font-weight:700}.empty{padding:26px;text-align:center;color:#75828b}.overlay{position:fixed;inset:0;background:#0d1720aa;display:none;align-items:center;justify-content:center;padding:16px;z-index:3}.overlay.open{display:flex}.dialog{width:min(650px,100%);max-height:92vh;overflow:auto;background:white;border-radius:14px;padding:22px}.dialog h2{margin:0 0 16px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;height:41px;border:1px solid #cad5dc;border-radius:8px;padding:8px;font:inherit}.field textarea{height:74px;resize:vertical}.wide{grid-column:1/-1}.dialogfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.secondary{background:#edf1f3}.hint{font-size:12px;color:#71808a;line-height:1.5;margin-top:18px}.footer{font-size:12px;color:#8a969d;margin:25px 0}@media(max-width:780px){.vehicle{grid-template-columns:1fr 1fr}.vehicle>div:first-child{grid-column:1/-1}.actions{grid-column:1/-1}.heading{align-items:flex-start}.top small{font-size:11px}}@media(max-width:480px){.heading{display:block}.heading .btn{margin-top:13px}.formgrid{grid-template-columns:1fr}.wide{grid-column:auto}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="brand">KP <span>CARS</span></div><small>Gestion du stock</small></header>
+  <main class="wrap">
+    <div class="heading"><div><h1>Mon stock</h1><p class="sub">Suivi des véhicules, des coûts et de la marge prévisionnelle.</p></div><button class="btn" id="addBtn">＋ Ajouter un véhicule</button></div>
+    <section class="stats" aria-label="Résumé du stock">
+      <div class="stat"><small>Véhicules en stock</small><strong id="count">0</strong></div>
+      <div class="stat"><small>Coût total engagé</small><strong id="invested">0 €</strong></div>
+      <div class="stat"><small>Valeur de revente prévue</small><strong id="resale">0 €</strong></div>
+      <div class="stat"><small>Marge prévisionnelle</small><strong id="margin">0 €</strong></div>
+    </section>
+    <section class="panel"><div class="toolbar"><input id="search" type="search" placeholder="Rechercher marque ou modèle…" aria-label="Rechercher"><select id="statusFilter" aria-label="Filtrer par statut"><option value="">Tous les statuts</option><option>À préparer</option><option>En vente</option><option>Réservé</option><option>Vendu</option></select><select id="sort" aria-label="Trier"><option value="new">Plus récents</option><option value="margin">Marge décroissante</option><option value="price">Prix d’achat croissant</option></select></div></section>
+    <section id="list" class="list" aria-live="polite"></section>
+    <p class="hint">Les données de cette première version sont enregistrées dans le navigateur utilisé. Elles ne sont pas encore synchronisées entre plusieurs appareils. Aucune annonce ni API externe n’est connectée.</p>
+    <p class="footer">KP Cars · Gestion interne du stock</p>
+  </main>
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+    <form class="dialog" id="vehicleForm">
+      <h2 id="dialogTitle">Ajouter un véhicule</h2>
+      <input id="vehicleId" type="hidden">
+      <div class="formgrid">
+        <div class="field"><label for="make">Marque *</label><input id="make" required maxlength="50" placeholder="Renault"></div>
+        <div class="field"><label for="model">Modèle *</label><input id="model" required maxlength="60" placeholder="Clio"></div>
+        <div class="field"><label for="year">Année</label><input id="year" type="number" min="1950" max="2100" placeholder="2019"></div>
+        <div class="field"><label for="mileage">Kilométrage (km)</label><input id="mileage" type="number" min="0" placeholder="85000"></div>
+        <div class="field"><label for="buyPrice">Prix d’achat (€) *</label><input id="buyPrice" type="number" min="0" step="0.01" required placeholder="8500"></div>
+        <div class="field"><label for="otherCosts">Autres frais (€)</label><input id="otherCosts" type="number" min="0" step="0.01" value="0" placeholder="1500"></div>
+        <div class="field"><label for="resalePrice">Prix de revente prévu (€)</label><input id="resalePrice" type="number" min="0" step="0.01" placeholder="12000"></div>
+        <div class="field"><label for="status">Statut</label><select id="status"><option>À préparer</option><option>En vente</option><option>Réservé</option><option>Vendu</option></select></div>
+        <div class="field wide"><label for="notes">Notes</label><textarea id="notes" maxlength="500" placeholder="État, travaux à prévoir, remarques…"></textarea></div>
+      </div>
+      <div class="dialogfoot"><button type="button" class="btn secondary" id="cancelBtn">Annuler</button><button type="submit" class="btn">Enregistrer</button></div>
+    </form>
+  </div>
+  <script>
+    const KEY='kpCarsInventory.v1';
+    const $=id=>document.getElementById(id);
+    const euros=n=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n)||0);
+    const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    let cars=load();
+    function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
+    function save(){localStorage.setItem(KEY,JSON.stringify(cars));render()}
+    function cost(c){return Number(c.buyPrice||0)+Number(c.otherCosts||0)}
+    function margin(c){return Number(c.resalePrice||0)-cost(c)}
+    function render(){
+      const active=cars.filter(c=>c.status!=='Vendu');
+      $('count').textContent=active.length;
+      $('invested').textContent=euros(active.reduce((s,c)=>s+cost(c),0));
+      $('resale').textContent=euros(active.reduce((s,c)=>s+Number(c.resalePrice||0),0));
+      $('margin').textContent=euros(active.reduce((s,c)=>s+margin(c),0));
+      const query=$('search').value.trim().toLowerCase(), status=$('statusFilter').value;
+      let shown=cars.filter(c=>(!query||`${c.make} ${c.model}`.toLowerCase().includes(query))&&(!status||c.status===status));
+      if($('sort').value==='margin')shown.sort((a,b)=>margin(b)-margin(a));
+      if($('sort').value==='price')shown.sort((a,b)=>Number(a.buyPrice)-Number(b.buyPrice));
+      if($('sort').value==='new')shown.sort((a,b)=>b.updatedAt-a.updatedAt);
+      $('list').innerHTML=shown.length?shown.map(c=>`<article class="vehicle"><div><h3>${safe(c.make)} ${safe(c.model)}</h3><div class="muted">${c.year||'Année inconnue'}${c.mileage?` · ${Number(c.mileage).toLocaleString('fr-BE')} km`:''}</div><span class="status s-${safe(c.status).replaceAll(' ','\\ ')}">${safe(c.status)}</span>${c.notes?`<p class="muted">${safe(c.notes)}</p>`:''}</div><div class="metric"><small>Coût total</small><strong>${euros(cost(c))}</strong></div><div class="metric"><small>Revente prévue</small><strong>${euros(c.resalePrice)}</strong></div><div class="metric"><small>Marge prévue</small><strong>${euros(margin(c))}</strong></div><div class="actions"><button class="linkbtn" data-edit="${c.id}">Modifier</button><button class="linkbtn" data-delete="${c.id}" aria-label="Supprimer ${safe(c.make)} ${safe(c.model)}">Supprimer</button></div></article>`).join(''):'<div class="panel empty">Aucun véhicule dans le stock pour ces critères. Clique sur « Ajouter un véhicule » pour commencer.</div>';
+      $('list').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openForm(b.dataset.edit));
+      $('list').querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>removeCar(b.dataset.delete));
+    }
+    function openForm(id=''){const car=cars.find(c=>c.id===id);$('vehicleForm').reset();$('vehicleId').value=car?.id||'';$('dialogTitle').textContent=car?'Modifier le véhicule':'Ajouter un véhicule';if(car)for(const k of ['make','model','year','mileage','buyPrice','otherCosts','resalePrice','status','notes'])$(k).value=car[k]??(k==='otherCosts'?0:'');$('overlay').classList.add('open');$('make').focus()}
+    function closeForm(){$('overlay').classList.remove('open')}
+    function removeCar(id){const c=cars.find(x=>x.id===id);if(c&&confirm(`Supprimer ${c.make} ${c.model} du stock ?`)){cars=cars.filter(x=>x.id!==id);save()}}
+    $('addBtn').onclick=()=>openForm();$('cancelBtn').onclick=closeForm;
+    $('overlay').onclick=e=>{if(e.target===$('overlay'))closeForm()};
+    $('search').oninput=render;$('statusFilter').onchange=render;$('sort').onchange=render;
+    $('vehicleForm').onsubmit=e=>{e.preventDefault();const id=$('vehicleId').value;const prev=cars.find(c=>c.id===id);const record={id:id||crypto.randomUUID(),updatedAt:Date.now()};for(const k of ['make','model','status','notes'])record[k]=$(k).value.trim();for(const k of ['year','mileage','buyPrice','otherCosts','resalePrice'])record[k]=Number($(k).value)||0;if(prev)cars=cars.map(c=>c.id===id?record:c);else cars.push(record);save();closeForm()};
+    render();
+  </script>
+</body>
+</html>
+
