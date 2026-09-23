@@ -191,6 +191,10 @@ app.post('/api/ai/chat', async (req, res) => {
   }
 });
 
+app.get('/api/ai/status', requireSession, (_req, res) => {
+  res.json({ configured: Boolean(process.env.OPENAI_API_KEY) });
+});
+
 app.get('/api/vehicles', async (_req, res, next) => {
   try {
     const { rows } = await pool.query(`SELECT ${selectColumns} FROM vehicles ORDER BY updated_at DESC`);
@@ -297,3 +301,4 @@ start().catch((error) => {
   console.error('KP Cars could not start:', error.message);
   process.exit(1);
 });
+
