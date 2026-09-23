@@ -15,9 +15,9 @@ Application privée pour suivre le stock de véhicules. Les annonces externes et
 1. Installer Node.js 20 ou plus récent.
 2. Copier `.env.example` dans `.env` et y renseigner `DATABASE_URL`, `APP_USER` et `APP_PASSWORD`.
 3. Ouvrir un terminal dans ce dossier et lancer `npm install`, puis `npm start`.
-4. Ouvrir `http://localhost:3000` et utiliser les identifiants définis dans `.env`.
+4. Ouvrir `http://localhost:3000` et saisir les identifiants définis dans `.env` sur l’écran de connexion.
 
-Au premier démarrage, l'application crée automatiquement la table `vehicles`. Le fichier `.env` ne doit jamais être ajouté à GitHub.
+Au premier démarrage, l'application crée automatiquement la table `vehicles`. La connexion web expire après 8 heures. Le fichier `.env` ne doit jamais être ajouté à GitHub.
 
 ## Déploiement Render
 

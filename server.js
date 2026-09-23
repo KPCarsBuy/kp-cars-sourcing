@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('node:path');
-const { randomUUID, timingSafeEqual } = require('node:crypto');
+const { randomUUID, timingSafeEqual, createHmac } = require('node:crypto');
 const { Pool } = require('pg');
 
 const app = express();
@@ -22,34 +22,62 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
-function requireConfigurationAndAuth(req, res, next) {
-  const appUser = process.env.APP_USER || 'kp-cars';
-  const appPassword = process.env.APP_PASSWORD;
-  if (!pool || !appPassword) {
-    return res.status(503).send('KP Cars is not fully configured yet.');
-  }
-
-  const header = req.get('authorization') || '';
-  const match = header.match(/^Basic\s+(.+)$/i);
-  if (match) {
-    try {
-      const decoded = Buffer.from(match[1], 'base64').toString('utf8');
-      const separator = decoded.indexOf(':');
-      const user = separator < 0 ? '' : decoded.slice(0, separator);
-      const password = separator < 0 ? '' : decoded.slice(separator + 1);
-      const actual = Buffer.from(`${user}:${password}`);
-      const expected = Buffer.from(`${appUser}:${appPassword}`);
-      if (actual.length === expected.length && timingSafeEqual(actual, expected)) return next();
-    } catch {
-      // Invalid Basic Auth values are handled by the same challenge below.
-    }
-  }
-  res.set('WWW-Authenticate', 'Basic realm="KP Cars Stock", charset="UTF-8"');
-  res.status(401).send('Authentication required.');
+function equalSecret(actual, expected) {
+  const left = Buffer.from(String(actual));
+  const right = Buffer.from(String(expected));
+  return left.length === right.length && timingSafeEqual(left, right);
 }
 
-app.use(requireConfigurationAndAuth);
+function signSession(payload, secret) {
+  return createHmac('sha256', secret).update(payload).digest('base64url');
+}
+
+function requireConfiguration(_req, res, next) {
+  if (!pool || !process.env.APP_PASSWORD) return res.status(503).json({ error: 'KP Cars n’est pas encore configuré.' });
+  next();
+}
+
+function requireSession(req, res, next) {
+  requireConfiguration(req, res, (configurationError) => {
+    if (configurationError) return next(configurationError);
+    const token = (req.get('cookie') || '').split(';').map((part) => part.trim())
+      .find((part) => part.startsWith('kp_session='))?.slice('kp_session='.length);
+    if (token) {
+      const [payload, signature] = token.split('.');
+      if (payload && signature && equalSecret(signature, signSession(payload, process.env.APP_PASSWORD))) {
+        try {
+          const [user, expiry] = Buffer.from(payload, 'base64url').toString('utf8').split(':');
+          if (user === (process.env.APP_USER || 'kp-cars') && Number(expiry) > Date.now()) return next();
+        } catch {
+          // Invalid or expired cookies receive the same response as no session.
+        }
+      }
+    }
+    res.status(401).json({ error: 'Connexion requise.' });
+  });
+}
+
+app.post('/api/login', requireConfiguration, (req, res) => {
+  const appUser = process.env.APP_USER || 'kp-cars';
+  if (!equalSecret(req.body?.username || '', appUser) || !equalSecret(req.body?.password || '', process.env.APP_PASSWORD)) {
+    return res.status(401).json({ error: 'Identifiants incorrects.' });
+  }
+  const expiry = Date.now() + 8 * 60 * 60 * 1000;
+  const payload = Buffer.from(`${appUser}:${expiry}`).toString('base64url');
+  const signature = signSession(payload, process.env.APP_PASSWORD);
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.set('Set-Cookie', `kp_session=${payload}.${signature}; Path=/; HttpOnly; SameSite=Lax; Max-Age=28800${secure}`);
+  res.json({ authenticated: true });
+});
+
+app.get('/api/session', requireSession, (_req, res) => res.json({ authenticated: true }));
+app.post('/api/logout', requireSession, (_req, res) => {
+  res.set('Set-Cookie', 'kp_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure');
+  res.status(204).end();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/api', requireSession);
 
 function parseVehicle(input, id = randomUUID()) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Données véhicule invalides.');
