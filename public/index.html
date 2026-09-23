@@ -22,10 +22,13 @@
     [hidden]{display:none!important}.aiLauncher{position:fixed;right:22px;bottom:22px;z-index:5;width:68px;height:68px;border:1px solid #999;border-radius:50%;background:#111;color:#fff;box-shadow:0 8px 28px #0009;font:700 14px Inter,"Segoe UI",Arial,sans-serif;cursor:pointer}.aiLauncher:hover{background:#292929;transform:translateY(-2px)}.aiPanel{position:fixed;right:22px;bottom:104px;z-index:5;width:min(440px,calc(100vw - 32px));max-height:min(76vh,700px);overflow:auto;margin:0;padding:18px;background:#080808;border:1px solid #555;border-radius:16px;box-shadow:0 14px 48px #000c}.aiClose{border:1px solid #777;background:#171717;color:#fff;border-radius:8px;padding:7px 10px;cursor:pointer;font:inherit}.aiPanel .aiMessages{max-height:min(42vh,380px)}
     .aiLauncher{isolation:isolate;background:radial-gradient(circle at 32% 25%,#555 0,#242424 28%,#080808 72%);border-color:#ddd;box-shadow:inset 2px 3px 7px #fff5,inset -4px -6px 9px #000,0 9px 0 #333,0 14px 24px #000b;animation:aiFloat 3.6s ease-in-out infinite;transform:perspective(180px) rotateX(5deg)}.aiLauncher::before{content:"";position:absolute;inset:5px;border:1px solid #ffffff55;border-radius:50%;pointer-events:none}.aiLauncher::after{content:"";position:absolute;inset:-9px;border:1px solid #ffffff22;border-radius:50%;z-index:-1;animation:aiHalo 3.6s ease-out infinite}.aiLauncher:hover{background:radial-gradient(circle at 32% 25%,#666 0,#292929 30%,#080808 75%);transform:perspective(180px) rotateX(0) translateY(-4px) scale(1.04);box-shadow:inset 2px 3px 8px #fff7,inset -4px -6px 9px #000,0 11px 0 #333,0 17px 30px #000c}.aiLauncher:active{transform:perspective(180px) rotateX(0) translateY(5px);box-shadow:inset 2px 3px 8px #fff5,inset -4px -6px 9px #000,0 3px 0 #333,0 7px 13px #000a}@keyframes aiFloat{0%,100%{translate:0 0;rotate:-2deg}50%{translate:0 -9px;rotate:2deg}}@keyframes aiHalo{0%,100%{opacity:.2;scale:.88}50%{opacity:.7;scale:1.08}}@media(prefers-reduced-motion:reduce){.aiLauncher,.aiLauncher::after{animation:none}.aiLauncher{translate:none;rotate:none}}
     @media(max-width:520px){.aiHeader{align-items:flex-start;flex-direction:column}.aiForm{flex-direction:column}.aiForm .btn{width:100%}}
+    .topActions{display:flex;align-items:center;gap:14px}.notificationBell{position:relative;display:grid;place-items:center;width:42px;height:42px;border:1px solid #777;border-radius:50%;background:#171717;color:#fff;cursor:pointer}.notificationBell:hover{background:#292929}.notificationBell svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.notificationBadge{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:12px;background:#fff;color:#000;font:700 11px Inter,"Segoe UI",Arial,sans-serif;display:grid;place-items:center}.notificationPanel{position:fixed;top:78px;right:20px;z-index:7;width:min(390px,calc(100vw - 28px));max-height:min(70vh,580px);overflow:auto;background:#080808;border:1px solid #555;border-radius:14px;box-shadow:0 14px 48px #000d;padding:16px}.notificationHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.notificationHead h2{font-size:20px;margin:0}.notificationList{display:grid;gap:8px}.notificationItem{width:100%;text-align:left;padding:12px;border:1px solid #383838;border-radius:9px;background:#111;color:#fff;cursor:pointer;font:inherit}.notificationItem.unread{border-left:3px solid #fff;background:#181818}.notificationItem strong{display:block;margin-bottom:5px}.notificationItem p{margin:0 0 7px;line-height:1.4}.notificationItem small,.notificationEmpty{color:#ccc;font-size:12px}.notificationEmpty{padding:18px 8px;text-align:center;line-height:1.5}
+    @media(max-width:520px){.topActions{gap:9px}.topActions>small{font-size:10px}.notificationPanel{top:72px;right:14px}}
   </style>
 </head>
 <body>
-  <header class="top"><div class="brand">KP <span>CARS</span></div><small>Gestion du stock</small></header>
+  <header class="top"><div class="brand">KP <span>CARS</span></div><div class="topActions" id="topActions" hidden><button class="notificationBell" id="notificationBell" type="button" aria-label="Ouvrir les notifications" aria-controls="notificationPanel" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span class="notificationBadge" id="notificationBadge" hidden>0</span></button><small>Gestion du stock</small></div></header>
+  <section class="notificationPanel" id="notificationPanel" role="dialog" aria-labelledby="notificationTitle" hidden><div class="notificationHead"><h2 id="notificationTitle">Notifications</h2><button class="aiClose" id="notificationClose" type="button">Fermer ✕</button></div><div class="notificationList" id="notificationList" aria-live="polite"><div class="notificationEmpty">Chargement des notifications…</div></div></section>
   <main class="authscreen" id="loginScreen">
     <h1>Connexion au stock</h1>
     <p>Entre tes identifiants KP Cars pour ouvrir la gestion du stock.</p>
@@ -82,6 +85,9 @@
     const euros=n=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n)||0);
     const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     let cars=[];
+    let notificationItems=[];
+    let notificationPanelOpen=false;
+    let notificationRefresh=null;
     const aiHistory=[];
     async function api(url,options={}){
       const response=await fetch(url,{...options,headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});
@@ -127,6 +133,22 @@
         $('aiStatus').textContent=state.configured?'':'KP IA est prêt. Il reste à ajouter la clé API OpenAI dans Render.';
       }catch(error){$('aiStatus').textContent=error.message;}
     }
+    function renderNotifications(unreadCount=0){
+      $('notificationBadge').hidden=unreadCount<1;
+      $('notificationBadge').textContent=unreadCount>99?'99+':String(unreadCount);
+      $('notificationBell').setAttribute('aria-label',unreadCount?`Ouvrir les notifications, ${unreadCount} non lue${unreadCount>1?'s':''}`:'Ouvrir les notifications');
+      $('notificationList').innerHTML=notificationItems.length?notificationItems.map(item=>`<button class="notificationItem ${item.readAt?'':'unread'}" type="button" data-notification="${safe(item.id)}"><strong>${safe(item.title)}</strong><p>${safe(item.message)}</p><small>${safe(item.source||'KP Cars')} · ${new Date(item.createdAt).toLocaleString('fr-BE')}</small></button>`).join(''):'<div class="notificationEmpty">Aucune notification pour le moment.<br>Les nouvelles annonces retenues apparaîtront ici lorsque la veille sera connectée.</div>';
+      $('notificationList').querySelectorAll('[data-notification]').forEach(button=>button.onclick=async()=>{
+        try{await api(`/api/notifications/${encodeURIComponent(button.dataset.notification)}/read`,{method:'POST'});await loadNotifications();}
+        catch(error){$('notice').textContent=error.message;}
+      });
+    }
+    async function loadNotifications(){
+      try{const result=await api('/api/notifications');notificationItems=result.items||[];renderNotifications(result.unreadCount||0);}
+      catch(error){if(error.message!=='Connexion requise.')$('notificationList').innerHTML=`<div class="notificationEmpty">${safe(error.message)}</div>`;}
+    }
+    function startNotificationRefresh(){if(!notificationRefresh)notificationRefresh=setInterval(loadNotifications,60000)}
+    function setNotificationsOpen(open){notificationPanelOpen=open;$('notificationPanel').hidden=!open;$('notificationBell').setAttribute('aria-expanded',String(open));if(open)loadNotifications();}
     function openForm(id=''){const car=cars.find(c=>c.id===id);$('vehicleForm').reset();$('vehicleId').value=car?.id||'';$('dialogTitle').textContent=car?'Modifier le véhicule':'Ajouter un véhicule';if(car)for(const k of ['make','model','year','mileage','buyPrice','otherCosts','resalePrice','status','notes'])$(k).value=car[k]??(k==='otherCosts'?0:'');$('overlay').classList.add('open');$('make').focus()}
     function closeForm(){$('overlay').classList.remove('open')}
     async function removeCar(id){const c=cars.find(x=>x.id===id);if(c&&confirm(`Supprimer ${c.make} ${c.model} du stock ?`)){try{await api(`/api/vehicles/${encodeURIComponent(id)}`,{method:'DELETE'});cars=await api('/api/vehicles');$('notice').textContent='Véhicule supprimé.';render();}catch(error){$('notice').textContent=error.message;}}}
@@ -143,9 +165,10 @@
       finally{$('aiSend').disabled=false;}
     };
     $('addBtn').onclick=()=>openForm();$('cancelBtn').onclick=closeForm;
+    $('notificationBell').onclick=()=>setNotificationsOpen(!notificationPanelOpen);$('notificationClose').onclick=()=>setNotificationsOpen(false);
     function setAiOpen(open){$('aiPanel').hidden=!open;$('aiToggle').hidden=open;$('aiToggle').setAttribute('aria-expanded',String(open));if(open)$('aiPrompt').focus();else $('aiToggle').focus();}
     $('aiToggle').onclick=()=>setAiOpen(true);$('aiClose').onclick=()=>setAiOpen(false);
-    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('aiPanel').hidden)setAiOpen(false)});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('aiPanel').hidden)setAiOpen(false);if(e.key==='Escape'&&notificationPanelOpen)setNotificationsOpen(false)});
     $('overlay').onclick=e=>{if(e.target===$('overlay'))closeForm()};
     $('search').oninput=render;$('statusFilter').onchange=render;$('sort').onchange=render;
     $('vehicleForm').onsubmit=async e=>{
@@ -159,12 +182,12 @@
       e.preventDefault();$('loginError').textContent='';
       try{
         await api('/api/login',{method:'POST',body:JSON.stringify({username:$('loginUser').value,password:$('loginPassword').value})});
-        $('loginPassword').value='';$('loginScreen').hidden=true;$('stockApp').hidden=false;await loadInventory();await loadAiStatus();
+        $('loginPassword').value='';$('loginScreen').hidden=true;$('stockApp').hidden=false;$('topActions').hidden=false;await loadInventory();await loadAiStatus();await loadNotifications();startNotificationRefresh();
       }catch(error){$('loginError').textContent=error.message;}
     };
     async function restoreSession(){
-      try{await api('/api/session');$('loginScreen').hidden=true;$('stockApp').hidden=false;await loadInventory();await loadAiStatus();}
-      catch(error){$('loginScreen').hidden=false;$('stockApp').hidden=true;if(error.message!=='Connexion requise.')$('loginError').textContent=error.message;}
+      try{await api('/api/session');$('loginScreen').hidden=true;$('stockApp').hidden=false;$('topActions').hidden=false;await loadInventory();await loadAiStatus();await loadNotifications();startNotificationRefresh();}
+      catch(error){$('loginScreen').hidden=false;$('stockApp').hidden=true;$('topActions').hidden=true;if(error.message!=='Connexion requise.')$('loginError').textContent=error.message;}
     }
     restoreSession();
   </script>
