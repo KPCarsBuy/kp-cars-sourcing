@@ -21,6 +21,8 @@ Au premier démarrage, l'application crée automatiquement la table `vehicles`. 
 
 ## Déploiement Render
 
-Le service web doit recevoir les variables secrètes `DATABASE_URL`, `APP_USER` et `APP_PASSWORD`. Pour un service Render situé dans la même région que PostgreSQL, utiliser l'URL de connexion **interne** de la base.
+Le service web doit recevoir les variables secrètes `DATABASE_URL`, `APP_USER` et `APP_PASSWORD`. Pour activer KP IA, ajouter aussi `OPENAI_API_KEY`; `OPENAI_MODEL` vaut `gpt-5.5` par défaut. Pour un service Render situé dans la même région que PostgreSQL, utiliser l'URL de connexion **interne** de la base.
+
+KP IA envoie la question et les champs structurés du stock à l'API OpenAI, sans les notes libres, et utilise la recherche web hébergée pour répondre avec des sources. L'intégration ne fait aucune modification automatique du stock. L'utilisation de l'API OpenAI est facturée séparément de ChatGPT.
 
 La base Render gratuite choisie pour ce MVP expire le **23 octobre 2026**. Elle n'inclut pas de sauvegardes. Exporter les données et passer à une base payante avant cette date pour conserver le stock.
